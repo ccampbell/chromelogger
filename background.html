@@ -1,0 +1,14 @@
+<html>
+<head>
+    <title>ChromePHP Background Page</title>
+    <script>
+        chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+            if (request === "getLocalStorage") {
+                sendResponse(localStorage);
+            }
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

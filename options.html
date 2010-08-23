@@ -1,0 +1,104 @@
+<html>
+<head>
+    <title>ChromePhp options</title>
+    <style>
+        body {
+            font-family: helvetica, sans-serif;
+            width: 800px;
+            margin: auto;
+        }
+        .mono {
+            font-family: 'monaco', monospace;
+        }
+        #info {
+            color: red;
+            display: none;
+            margin-bottom: 10px;
+        }
+        header {
+            width: 488px;
+            margin: auto;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        header h1 {
+            margin-top: 40px;
+        }
+        header img {
+            float: left;
+            margin-right: 20px;
+        }
+        .content {
+            width: 400px;
+            margin: auto;
+            margin-top: 30px;
+            background: #eee;
+            -webkit-border-radius: 5px;
+            padding: 15px;
+            border: 2px solid #999;
+            overflow: hidden;
+        }
+        p {
+            margin: 0px;
+            padding: 0px;
+        }
+        input {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            float: right;
+            margin-left: 10px;
+        }
+        p.info {
+            font-size: .8em;
+        }
+    </style>
+<script type="text/javascript">
+
+function save_options()
+{
+    var line_numbers = document.getElementById("show_line_numbers");
+    localStorage["show_line_numbers"] = line_numbers.checked;
+    var info_div = document.getElementById("info");
+    info_div.innerHTML = "your settings have been saved";
+    info_div.style.display = "block";
+    setTimeout(function() {
+        info_div.style.display = "none";
+    }, 2000);
+}
+
+function init()
+{
+    var line_numbers = document.getElementById("show_line_numbers");
+    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
+}
+
+function restore_defaults()
+{
+    var line_numbers = document.getElementById("show_line_numbers");
+    localStorage["show_line_numbers"] = false;
+    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
+}
+
+</script>
+</head>
+<body onload="init()">
+    <header>
+        <img src="http://www.craigiam.com/img/chromephp/icon128.png" alt="logo">
+        <h1 class="mono">ChromePhp Options</h1>
+    </header>
+    <div class="content">
+        <div id="info"></div>
+        <p class="info">if this option is checked then we will show the filename and line number where the call originated</p>
+        <label>
+            show line numbers:
+            <input type="checkbox" id="show_line_numbers" name="show_line_numbers">
+        </label>
+        <div>
+            <button onclick="save_options()">Save Changes</button>
+            <button onclick="restore_defaults()">Restore Defaults</button>
+        </div>
+    </div>
+</body>
+</html>
