@@ -1,6 +1,6 @@
 {
     "name": "ChromePHP",
-    "version": "0.133",
+    "version": "0.140",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
@@ -14,7 +14,7 @@
         "48": "icon48.png",
         "128": "icon128.png"
     },
-    "description": "For PHP logging in chrome console.",
+    "description": "For PHP logging and debugging in chrome console.",
     "browser_action": {
         "default_icon": "icon48.png",
         "popup": "popup.html"
