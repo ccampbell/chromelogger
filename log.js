@@ -60,4 +60,4 @@ function deleteCookie(name)
             deleteCookie(cookie_name);
         }
     });
-} ());
+}) ();
