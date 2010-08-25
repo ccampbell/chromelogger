@@ -1,10 +1,10 @@
 {
     "name": "ChromePHP",
-    "version": "0.140",
+    "version": "0.145",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
-            "js": ["log.min.js"]
+            "js": ["log.js"]
         }
     ],
     "background_page": "background.html",
@@ -16,7 +16,13 @@
     },
     "description": "For PHP logging and debugging in chrome console.",
     "browser_action": {
-        "default_icon": "icon48.png",
-        "popup": "popup.html"
-    }
+        "default_icon": "icon48_disabled.png",
+        "default_title": "ChromePHP 0.145"
+    },
+    "permissions":
+    [
+      "tabs",
+      "http://*/*",
+      "https://*/*"
+    ]
 }

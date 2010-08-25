@@ -68,7 +68,12 @@ function run()
     });
 }
 
-run();
+chrome.extension.sendRequest("isActive", function(response) {
+    if (response === false) {
+        return;
+    }
+    run();
+});
 
 // hack for now until we can get real listeners for XHR
 function checkForCookie()
