@@ -28,6 +28,34 @@ function deleteCookie(name)
     document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;';
 }
 
+function logData(data)
+{
+    values = data["data"];
+    backtrace_values = data["backtrace"];
+    label_values = data["labels"];
+
+    chrome.extension.sendRequest("getLocalStorage", function(response) {
+        var show_line_numbers = response.show_line_numbers == "true" ? true : false;
+
+        var last_backtrace = null;
+        if (values.length) {
+            for (i = 0; i < values.length; ++i) {
+                if (show_line_numbers && backtrace_values[i] !== null && last_backtrace != backtrace_values[i]) {
+                    last_backtrace = backtrace_values[i];
+                    console.log(backtrace_values[i]);
+                }
+                if (label_values[i] && typeof label_values[i] === "string") {
+                    console.log(label_values[i], values[i]);
+                } else {
+                    console.log(values[i]);
+                }
+            }
+            deleteCookie(cookie_name);
+            running = false;
+        }
+    });
+}
+
 function run()
 {
     running = true;
@@ -42,30 +70,43 @@ function run()
     }
 
     data = JSON.parse(decodeURIComponent(cookie));
-    values = data["data"];
-    backtrace_values = data["backtrace"];
-    label_values = data["labels"];
+    // if (data["cookies"]) {
+    //     var cookies = data["cookies"];
+    //     data = '';
+    //     for (i in cookies) {
+    //         cookie_data = getCookie(cookies[i]);
+    //         deleteCookie(cookies[i]);
+    //         data += cookie_data
+    //     }
+    //     data = JSON.parse(decodeURIComponent(data));
+    // }
 
-    chrome.extension.sendRequest("getLocalStorage", function(response) {
-        var show_line_numbers = response.show_line_numbers == "true" ? true : false;
+    if (data.uri) {
+        var request = new XMLHttpRequest();
+        request.open("GET", data.uri);
+        request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-        var last_backtrace = null;
-        if (values.length) {
-            for (i = 0; i < values.length; ++i) {
-                if (show_line_numbers && last_backtrace != backtrace_values[i]) {
-                    last_backtrace = backtrace_values[i];
-                    console.log(backtrace_values[i]);
-                }
-                if (label_values[i] && typeof label_values[i] === "string") {
-                    console.log(label_values[i], values[i]);
-                } else {
-                    console.log(values[i]);
+        request.onreadystatechange = function(e) {
+            if (request.readyState == 4) {
+                switch (request.status) {
+                    case 200:
+                        data = JSON.parse(decodeURIComponent(request.responseText));
+                        return logData(data);
+                    case 404:
+                        console.warn('404 Page Not Found', data.uri);
+                        break;
+                    case 403:
+                        console.warn('403 Forbidden', data.uri);
+                        break;
                 }
             }
-            deleteCookie(cookie_name);
-            running = false;
-        }
-    });
+        };
+
+        request.send(data);
+        return;
+    }
+
+    logData(data);
 }
 
 chrome.extension.sendRequest("isActive", function(response) {
