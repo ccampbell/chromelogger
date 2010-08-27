@@ -28,32 +28,38 @@ function deleteCookie(name)
     document.cookie = name + '=; expires=Thu, 01-Jan-70 00:00:01 GMT;';
 }
 
-function logData(data)
+function logCleanData(json)
 {
-    values = data["data"];
-    backtrace_values = data["backtrace"];
-    label_values = data["labels"];
-
     chrome.extension.sendRequest("getLocalStorage", function(response) {
         var show_line_numbers = response.show_line_numbers == "true" ? true : false;
 
-        var last_backtrace = null;
-        if (values.length) {
-            for (i = 0; i < values.length; ++i) {
-                if (show_line_numbers && backtrace_values[i] !== null && last_backtrace != backtrace_values[i]) {
-                    last_backtrace = backtrace_values[i];
-                    console.log(backtrace_values[i]);
-                }
-                if (label_values[i] && typeof label_values[i] === "string") {
-                    console.log(label_values[i], values[i]);
-                } else {
-                    console.log(values[i]);
-                }
-            }
-            deleteCookie(cookie_name);
-            running = false;
+        column_map = {};
+        for (key in json.columns) {
+            column_name = json.columns[key];
+            column_map[column_name] = key;
         }
+
+        var rows = json.rows;
+        for (i = 0; i < rows.length; ++i) {
+            row = rows[i];
+            backtrace = row[column_map.backtrace];
+            label = row[column_map.label];
+            log = row[column_map.log];
+
+            if (backtrace !== null) {
+                console.log(backtrace);
+            }
+
+            if (label && typeof label === "string") {
+                console.log(label, log);
+            } else {
+                console.log(log);
+            }
+
+        }
+        deleteCookie(cookie_name);
     });
+    running = false;
 }
 
 function run()
@@ -70,16 +76,11 @@ function run()
     }
 
     data = JSON.parse(decodeURIComponent(cookie));
-    // if (data["cookies"]) {
-    //     var cookies = data["cookies"];
-    //     data = '';
-    //     for (i in cookies) {
-    //         cookie_data = getCookie(cookies[i]);
-    //         deleteCookie(cookies[i]);
-    //         data += cookie_data
-    //     }
-    //     data = JSON.parse(decodeURIComponent(data));
-    // }
+
+    // not sure why this is happening
+    if (typeof data === "string") {
+        data = JSON.parse(data);
+    }
 
     if (data.uri) {
         var request = new XMLHttpRequest();
@@ -132,8 +133,43 @@ function checkForCookie()
     }) ();
 }
 
-window.addEventListener("click", function(event) {
-    if (event.target.type == "submit" || event.target.localName == "a") {
-        checkForCookie();
+function logData(data)
+{
+    var version = data["version"];
+    if (version >= '0.147') {
+        return logCleanData(data);
     }
-});
+    values = data["data"];
+    backtrace_values = data["backtrace"];
+    label_values = data["labels"];
+
+    chrome.extension.sendRequest("getLocalStorage", function(response) {
+        var show_line_numbers = response.show_line_numbers == "true" ? true : false;
+
+        var last_backtrace = null;
+        if (values.length) {
+            for (i = 0; i < values.length; ++i) {
+                if (show_line_numbers && backtrace_values[i] !== null && last_backtrace != backtrace_values[i]) {
+                    last_backtrace = backtrace_values[i];
+                    console.log(backtrace_values[i]);
+                }
+                if (label_values[i] && typeof label_values[i] === "string") {
+                    console.log(label_values[i], values[i]);
+                } else {
+                    console.log(values[i]);
+                }
+            }
+            deleteCookie(cookie_name);
+        }
+        running = false;
+    });
+}
+
+(function init()
+{
+    window.addEventListener("click", function(event) {
+        if (event.target.type == "submit" || event.target.type == "button" || event.target.localName == "a") {
+            checkForCookie();
+        }
+    });
+}) ();
