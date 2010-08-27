@@ -46,7 +46,7 @@ function logCleanData(json)
             label = row[column_map.label];
             log = row[column_map.log];
 
-            if (backtrace !== null) {
+            if (show_line_numbers && backtrace !== null) {
                 console.log(backtrace);
             }
 

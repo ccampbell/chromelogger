@@ -1,6 +1,6 @@
 {
     "name": "ChromePHP",
-    "version": "0.147",
+    "version": "0.1471",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
@@ -17,7 +17,7 @@
     "description": "For PHP logging and debugging in chrome console.",
     "browser_action": {
         "default_icon": "icon48_disabled.png",
-        "default_title": "ChromePHP 0.147"
+        "default_title": "ChromePHP 0.1471"
     },
     "permissions":
     [
