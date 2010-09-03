@@ -195,17 +195,37 @@ function logCleanData(json)
             backtrace = row[column_map.backtrace];
             label = row[column_map.label];
             log = row[column_map.log];
+            type = row[column_map.type];
 
             if (show_line_numbers && backtrace !== null) {
                 console.log(backtrace);
             }
 
-            if (label && typeof label === "string") {
-                console.log(label, log);
-            } else {
-                console.log(log);
-            }
+            var show_label = label && typeof label === "string";
 
+            switch (type) {
+                case 'warn':
+                    if (show_label) {
+                        console.warn(label, log);
+                        break;
+                    }
+                    console.warn(log);
+                    break;
+                case 'error':
+                    if (show_label) {
+                        console.error(label, log);
+                        break;
+                    }
+                    console.error(log);
+                    break;
+                default:
+                    if (show_label) {
+                        console.log(label, log);
+                        break;
+                    }
+                    console.log(log);
+                    break;
+            }
         }
         deleteCookie(cookie_name);
     });
