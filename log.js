@@ -252,7 +252,7 @@ var ChromePhpLogger = function()
      */
     var _logData = function(data)
     {
-        if (_showUpgradeMessages() && data.version < "2.0.1") {
+        if (_showUpgradeMessages() && data.version < "2.1.0") {
             console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.1.0.\nIt is recommended that you upgrade at http://www.chromephp.com");
         }
         if (data.version > "0.147") {
