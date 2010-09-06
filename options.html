@@ -60,6 +60,10 @@ function save_options()
 {
     var line_numbers = document.getElementById("show_line_numbers");
     localStorage["show_line_numbers"] = line_numbers.checked;
+
+    var upgrade_messages = document.getElementById("show_upgrade_messages");
+    localStorage["show_upgrade_messages"] = upgrade_messages.checked;
+
     var info_div = document.getElementById("info");
     info_div.innerHTML = "your settings have been saved";
     info_div.style.display = "block";
@@ -72,6 +76,9 @@ function init()
 {
     var line_numbers = document.getElementById("show_line_numbers");
     line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
+
+    var upgrade_messages = document.getElementById("show_upgrade_messages");
+    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
 }
 
 function restore_defaults()
@@ -79,6 +86,10 @@ function restore_defaults()
     var line_numbers = document.getElementById("show_line_numbers");
     localStorage["show_line_numbers"] = false;
     line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
+
+    var upgrade_messages = document.getElementById("show_upgrade_messages");
+    localStorage["show_upgrade_messages"] = true;
+    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
 }
 
 </script>
@@ -90,10 +101,16 @@ function restore_defaults()
     </header>
     <div class="content">
         <div id="info"></div>
-        <p class="info">if this option is checked then we will show the filename and line number where the call originated</p>
+        <p class="info">show the filenames and line numbers where your calls originated</p>
         <label>
             show line numbers:
             <input type="checkbox" id="show_line_numbers" name="show_line_numbers">
+        </label>
+
+        <p class="info">show upgrade messages when your server side library is out of date</p>
+        <label>
+            show upgrade messages:
+            <input type="checkbox" id="show_upgrade_messages" name="show_upgrade_messages">
         </label>
         <div>
             <button onclick="save_options()">Save Changes</button>
