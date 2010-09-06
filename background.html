@@ -82,15 +82,42 @@
         })
     }
 
+    chrome.cookies.onChanged.addListener(function(info) {
+        chrome.tabs.getSelected(null, function(tab) {
+            if (getTopLevelDomain(tab.url) != info.cookie.domain) {
+                return;
+            }
+            chrome.tabs.sendRequest(tab.id, {name: "cookie_update", info: info});
+        });
+    });
+
     chrome.browserAction.onClicked.addListener(handleIconClick);
     chrome.tabs.onSelectionChanged.addListener(handleTabUpdate);
     chrome.tabs.onUpdated.addListener(handleTabUpdate);
     chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-        if (request === "getLocalStorage") {
+        if (request === "localStorage") {
             sendResponse(localStorage);
+            return;
         }
         if (request === "isActive") {
             sendResponse(active);
+            return;
+        }
+        if (request.name === "cookie") {
+            details = {};
+            details.url = request.url;
+            details.name = request.cookie_name;
+            chrome.cookies.get(details, function(cookie) {
+                sendResponse(cookie);
+            });
+            return;
+        }
+        if (request.name === "eatCookie") {
+            details = {};
+            details.url = request.url;
+            details.name = request.cookie_name;
+            chrome.cookies.remove(details);
+            sendResponse({removed : true});
         }
     });
 
