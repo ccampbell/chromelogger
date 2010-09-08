@@ -156,6 +156,9 @@ var ChromePhpLogger = function()
      */
     var _showUpgradeMessages = function()
     {
+        if (local_storage.show_upgrade_messages === undefined) {
+            return true;
+        }
         return local_storage.show_upgrade_messages == "true";
     };
 

@@ -79,6 +79,10 @@ function init()
 
     var upgrade_messages = document.getElementById("show_upgrade_messages");
     upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
+
+    if (localStorage["show_upgrade_messages"] === undefined) {
+        upgrade_messages.checked = true;
+    }
 }
 
 function restore_defaults()
