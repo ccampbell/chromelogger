@@ -268,7 +268,7 @@ var ChromePhpLogger = function()
      */
     var _complete = function()
     {
-        if (!_useCookieApi) {
+        if (!_useCookieApi()) {
             Util.eatCookie(cookie_name);
             return;
         }
