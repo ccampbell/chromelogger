@@ -82,14 +82,16 @@
         })
     }
 
-    chrome.cookies.onChanged.addListener(function(info) {
-        chrome.tabs.getSelected(null, function(tab) {
-            if (getTopLevelDomain(tab.url) != info.cookie.domain) {
-                return;
-            }
-            chrome.tabs.sendRequest(tab.id, {name: "cookie_update", info: info});
+    if (chrome.cookies) {
+        chrome.cookies.onChanged.addListener(function(info) {
+            chrome.tabs.getSelected(null, function(tab) {
+                if (getTopLevelDomain(tab.url) != info.cookie.domain) {
+                    return;
+                }
+                chrome.tabs.sendRequest(tab.id, {name: "cookie_update", info: info});
+            });
         });
-    });
+    }
 
     chrome.browserAction.onClicked.addListener(handleIconClick);
     chrome.tabs.onSelectionChanged.addListener(handleTabUpdate);
