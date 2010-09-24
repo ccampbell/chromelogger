@@ -86,7 +86,7 @@ var ChromePhpLogger = function()
     var _logDataFromUrl = function(url)
     {
         var request = new XMLHttpRequest();
-        request.open("GET", url);
+        request.open("GET", url + "?time=" + new Date().getTime());
         request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
         request.onreadystatechange = function(e) {
