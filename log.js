@@ -463,7 +463,7 @@ var Util = {
      }
 };
 
-window.onload = ChromePhpLogger.init();
+ChromePhpLogger.init();
 
 /**
  *

@@ -1,6 +1,6 @@
 {
     "name": "ChromePHP",
-    "version": "2.1.0.5",
+    "version": "2.1.0.6",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
