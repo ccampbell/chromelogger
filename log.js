@@ -191,6 +191,15 @@ var ChromePhpLogger = function()
             var show_label = label && typeof label === "string";
 
             switch (type) {
+                case 'group':
+                    console.group(log);
+                    break;
+                case 'groupEnd':
+                    console.groupEnd(log);
+                    break;
+                case 'groupCollapsed':
+                    console.groupCollapsed(log);
+                    break;
                 case 'warn':
                     if (show_label) {
                         console.warn(label, log);
@@ -255,8 +264,8 @@ var ChromePhpLogger = function()
      */
     var _logData = function(data)
     {
-        if (_showUpgradeMessages() && data.version < "2.2") {
-            console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.2.\nIt is recommended that you upgrade at http://www.chromephp.com");
+        if (_showUpgradeMessages() && data.version < "2.2.1") {
+            console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.2.1.\nIt is recommended that you upgrade at http://www.chromephp.com");
         }
         if (data.version > "0.147") {
             return _logCleanData(data, _complete);
