@@ -176,13 +176,16 @@ var ChromePhpLogger = function()
             column_map[column_name] = key;
         }
 
-        var rows = data.rows;
-        for (i = 0; i < rows.length; ++i) {
-            row = rows[i];
-            backtrace = row[column_map.backtrace];
-            label = row[column_map.label];
-            log = row[column_map.log];
-            type = row[column_map.type];
+        var rows = data.rows,
+            i = 0,
+            length = rows.length;
+
+        for (i = 0; i < length; ++i) {
+            var row = rows[i],
+                backtrace = row[column_map.backtrace],
+                label = row[column_map.label],
+                log = row[column_map.log],
+                type = row[column_map.type];
 
             if (_showLineNumbers() && backtrace !== null) {
                 console.log(backtrace);
@@ -191,35 +194,22 @@ var ChromePhpLogger = function()
             var show_label = label && typeof label === "string";
 
             switch (type) {
+                default:
+                    type = 'log';
                 case 'group':
-                    console.group(log);
-                    break;
                 case 'groupEnd':
-                    console.groupEnd(log);
-                    break;
                 case 'groupCollapsed':
-                    console.groupCollapsed(log);
+                    console[type](log);
                     break;
                 case 'warn':
-                    if (show_label) {
-                        console.warn(label, log);
-                        break;
-                    }
-                    console.warn(log);
-                    break;
                 case 'error':
+                case 'info':
+                case 'log':
                     if (show_label) {
-                        console.error(label, log);
+                        console[type](label, log);
                         break;
                     }
-                    console.error(log);
-                    break;
-                default:
-                    if (show_label) {
-                        console.log(label, log);
-                        break;
-                    }
-                    console.log(log);
+                    console[type](log);
                     break;
             }
         }
@@ -264,8 +254,8 @@ var ChromePhpLogger = function()
      */
     var _logData = function(data)
     {
-        if (_showUpgradeMessages() && data.version < "2.2.2") {
-            console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.2.2.\nIt is recommended that you upgrade at http://www.chromephp.com");
+        if (_showUpgradeMessages() && data.version < "2.2.3") {
+            console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.2.3.\nIt is recommended that you upgrade at http://www.chromephp.com");
         }
         if (data.version > "0.147") {
             return _logCleanData(data, _complete);
