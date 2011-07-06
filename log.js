@@ -194,8 +194,6 @@ var ChromePhpLogger = function()
             var show_label = label && typeof label === "string";
 
             switch (type) {
-                default:
-                    type = 'log';
                 case 'group':
                 case 'groupEnd':
                 case 'groupCollapsed':
@@ -204,6 +202,8 @@ var ChromePhpLogger = function()
                 case 'warn':
                 case 'error':
                 case 'info':
+                default:
+                    type = 'log';
                 case 'log':
                     if (show_label) {
                         console[type](label, log);
