@@ -199,11 +199,11 @@ var ChromePhpLogger = function()
                 case 'groupCollapsed':
                     console[type](log);
                     break;
+                default:
+                    type = 'log';
                 case 'warn':
                 case 'error':
                 case 'info':
-                default:
-                    type = 'log';
                 case 'log':
                     if (show_label) {
                         console[type](label, log);
