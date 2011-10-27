@@ -76,7 +76,7 @@ var ChromePhpLogger = function()
                 backtrace = row[column_map.backtrace],
                 label = row[column_map.label],
                 log = row[column_map.log],
-                type = row[column_map.type];
+                type = row[column_map.type] || 'log';
 
             if (_showLineNumbers() && backtrace !== null) {
                 console.log(backtrace);
@@ -84,9 +84,22 @@ var ChromePhpLogger = function()
 
             var show_label = label && typeof label === "string";
 
+            if (!label) {
+                label = "";
+            }
+
+            if (typeof log === 'object' && log.x_class_name) {
+                show_label = true;
+
+                if (label) {
+                    label += " ";
+                }
+
+                label += log.x_class_name + ':';
+                delete log["x_class_name"];
+            }
+
             switch (type) {
-                default:
-                    type = 'log';
                 case 'group':
                 case 'groupEnd':
                 case 'groupCollapsed':
