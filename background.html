@@ -1,128 +1,124 @@
 <script>
-    var active = false;
-
-    function handleIconClick(tab)
-    {
-        if (tabIsChrome(tab)) {
-            alert("You cannot use ChromePHP on this page.");
-            return;
-        }
-        toggleDomain(tab);
-    }
-
-    function tabIsChrome(tab)
-    {
-        return tab.url.indexOf("https://chrome.google.com/extensions") == 0 || tab.url.indexOf("chrome://") == 0;
-    }
-
-    function toggleDomain(tab)
-    {
-        var url = tab.url;
-        url = getTopLevelDomain(url);
-        if (domainIsActive(url)) {
-            localStorage[url] = false;
-            deactivate();
-            return;
-        }
-        localStorage[url] = true;
-        activate();
-    }
-
-    function getTopLevelDomain(url)
-    {
-        var pattern = /^(https?:\/\/)/;
-        url = url.replace(pattern, '', url);
-        domain = url.split('/')[0];
-        bits = domain.split('.');
-        ext = bits.pop();
-        domain = bits.pop();
-        return domain + "." + ext;
-    }
-
-    function domainIsActive(url)
-    {
-        return localStorage[url] == "true";
-    }
-
-    function activate()
-    {
-        active = true;
-        enableIcon();
-    }
-
-    function deactivate()
-    {
+    window.ChromePhp = (function () {
         active = false;
-        disableIcon();
-    }
 
-    function enableIcon()
-    {
-        chrome.browserAction.setIcon({path:"icon48.png"});
-    }
+        /**
+         * determines if this tab is a chrome tab in which case the extension cannot run
+         */
+        function _tabIsChrome(tab) {
+            return tab.url.indexOf("https://chrome.google.com/extensions") == 0 || tab.url.indexOf("chrome://") == 0;
+        }
 
-    function disableIcon()
-    {
-        chrome.browserAction.setIcon({path:"icon48_disabled.png"});
-    }
+        /**
+         * handles a click on the extension icon
+         */
+        function _handleIconClick(tab) {
+            if (_tabIsChrome(tab)) {
+                return alert('You cannot use ChromePHP on this page.');
+            }
+            _toggleDomain(tab);
+        }
 
-    function handleTabUpdate(tab_id)
-    {
-        chrome.tabs.get(tab_id, function (tab) {
-            if (tabIsChrome(tab)) {
-                deactivate();
+        function _toggleDomain(tab)
+        {
+            var url = tab.url;
+            url = _getTopLevelDomain(url);
+            if (_domainIsActive(url)) {
+                localStorage[url] = false;
+                _deactivate();
                 return;
             }
-            domain = getTopLevelDomain(tab.url);
-            if (domainIsActive(domain)) {
-                activate();
-                return;
-            }
-            deactivate();
-        })
-    }
+            localStorage[url] = true;
+            _activate();
+        }
 
-    if (chrome.cookies) {
-        chrome.cookies.onChanged.addListener(function(info) {
-            chrome.tabs.getSelected(null, function(tab) {
+        function _getTopLevelDomain(url)
+        {
+            var pattern = /^(https?:\/\/)/;
+            url = url.replace(pattern, '', url);
+            domain = url.split('/')[0];
+            bits = domain.split('.');
+            ext = bits.pop();
+            domain = bits.pop();
+            return domain + "." + ext;
+        }
 
-                if (info.cookie.domain.indexOf(getTopLevelDomain(tab.url)) === -1) {
-                    return;
+        function _domainIsActive(url)
+        {
+            return localStorage[url] == "true";
+        }
+
+        function _activate()
+        {
+            active = true;
+            _enableIcon();
+        }
+
+        function _deactivate()
+        {
+            active = false;
+            _disableIcon();
+        }
+
+        function _enableIcon()
+        {
+            chrome.browserAction.setIcon({
+                path: "icon48.png"
+            });
+        }
+
+        function _disableIcon()
+        {
+            chrome.browserAction.setIcon({
+                path: "icon48_disabled.png"
+            });
+        }
+
+        function _handleTabUpdate(tab_id)
+        {
+            chrome.tabs.get(tab_id, function (tab) {
+                if (_tabIsChrome(tab)) {
+                    return _deactivate();
                 }
 
-                chrome.tabs.sendRequest(tab.id, {name: "cookie_update", info: info});
-            });
-        });
-    }
+                domain = _getTopLevelDomain(tab.url);
+                if (_domainIsActive(domain)) {
+                    return _activate();
+                }
 
-    chrome.browserAction.onClicked.addListener(handleIconClick);
-    chrome.tabs.onSelectionChanged.addListener(handleTabUpdate);
-    chrome.tabs.onUpdated.addListener(handleTabUpdate);
-    chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
-        if (request === "localStorage") {
-            sendResponse(localStorage);
-            return;
+                _deactivate();
+            })
         }
-        if (request === "isActive") {
-            sendResponse(active);
-            return;
-        }
-        if (request.name === "cookie") {
-            details = {};
-            details.url = request.url;
-            details.name = request.cookie_name;
-            chrome.cookies.get(details, function(cookie) {
-                sendResponse(cookie);
-            });
-            return;
-        }
-        if (request.name === "eatCookie") {
-            details = {};
-            details.url = request.url;
-            details.name = request.cookie_name;
-            chrome.cookies.remove(details);
-            sendResponse({removed : true});
-        }
-    });
 
+        function _addListeners()
+        {
+            chrome.browserAction.onClicked.addListener(_handleIconClick);
+            chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
+            chrome.tabs.onUpdated.addListener(_handleTabUpdate);
+
+            chrome.experimental.webRequest.onResponseStarted.addListener(function(details) {
+                chrome.tabs.getSelected(null, function(tab) {
+                    chrome.tabs.sendRequest(tab.id, {name: "header_update", details: details});
+                });
+            }, {}, ["responseHeaders"]);
+
+            chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+                if (request === "localStorage") {
+                    return sendResponse(localStorage);
+                }
+
+                if (request === "isActive") {
+                    return sendResponse(active);
+                }
+            });
+        }
+
+        return {
+            init: function() {
+                _addListeners();
+            }
+        }
+    }) ();
+
+    window.ChromePhp.init();
 </script>

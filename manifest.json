@@ -1,10 +1,11 @@
 {
-    "name": "ChromePHP",
-    "version": "2.2.3",
+    "name": "ChromePHP (WebRequest API)",
+    "version": "3.0",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
-            "js": ["log.js"]
+            "js": ["log.js"],
+            "run_at": "document_start"
         }
     ],
     "background_page": "background.html",
@@ -17,14 +18,13 @@
     "description": "For PHP logging and debugging in chrome console.",
     "browser_action": {
         "default_icon": "icon48_disabled.png",
-        "default_title": "ChromePHP 2.2.3"
+        "default_title": "ChromePHP 3.0 (WebRequest API)"
     },
-    "minimum_chrome_version" : "6",
     "permissions":
     [
-      "cookies",
-      "tabs",
-      "http://*/*",
-      "https://*/*"
+        "experimental",
+        "tabs",
+        "http://*/*",
+        "https://*/*"
     ]
 }
