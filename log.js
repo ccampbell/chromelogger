@@ -88,15 +88,15 @@ var ChromePhpLogger = function()
                 label = "";
             }
 
-            if (typeof log === 'object' && log.x_class_name) {
+            if (typeof log === 'object' && log.___class_name) {
                 show_label = true;
 
                 if (label) {
                     label += " ";
                 }
 
-                label += log.x_class_name + ':';
-                delete log["x_class_name"];
+                label += log.___class_name + ':';
+                delete log["___class_name"];
             }
 
             switch (type) {
