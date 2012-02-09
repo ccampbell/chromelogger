@@ -1,5 +1,5 @@
 {
-    "name": "ChromePHP (WebRequest API)",
+    "name": "ChromePHP",
     "version": "3.0",
     "content_scripts": [
         {
@@ -18,11 +18,12 @@
     "description": "For PHP logging and debugging in chrome console.",
     "browser_action": {
         "default_icon": "icon48_disabled.png",
-        "default_title": "ChromePHP 3.0 (WebRequest API)"
+        "default_title": "ChromePHP 3.0"
     },
+    "minimum_chrome_version": "17",
     "permissions":
     [
-        "experimental",
+        "webRequest",
         "tabs",
         "http://*/*",
         "https://*/*"

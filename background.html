@@ -96,11 +96,11 @@
             chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
             chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
-            chrome.experimental.webRequest.onResponseStarted.addListener(function(details) {
+            chrome.webRequest.onResponseStarted.addListener(function(details) {
                 chrome.tabs.getSelected(null, function(tab) {
                     chrome.tabs.sendRequest(tab.id, {name: "header_update", details: details});
                 });
-            }, {}, ["responseHeaders"]);
+            }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
             chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
                 if (request === "localStorage") {

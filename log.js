@@ -62,7 +62,7 @@ var ChromePhpLogger = function()
     function _logCleanData(data, callback)
     {
         column_map = {};
-        for (key in data.columns) {
+        for (var key in data.columns) {
             column_name = data.columns[key];
             column_map[column_name] = key;
         }
@@ -327,7 +327,7 @@ var Util = {
      */
      inArray : function(needle, haystack)
      {
-        for (key in haystack) {
+        for (var key in haystack) {
             if (haystack[key] == needle) {
                 return true;
             }
@@ -473,4 +473,4 @@ var Base64 = {
         }
         return string;
     }
-}
+};
