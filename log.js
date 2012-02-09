@@ -8,7 +8,7 @@ var ChromePhpLogger = function()
     /**
      * @var string
      */
-    var cookie_name = "chromephp_log";
+    var HEADER_NAME = "X-ChromePhp-Data";
 
     /**
      * @var object
@@ -21,146 +21,37 @@ var ChromePhpLogger = function()
     var request_times = [];
 
     /**
-     * gets the current version of chrome
-     *
-     * @return int
+     * @var array
      */
-    var _getChromeVersion = function()
-    {
-        /Chrome\/(.*)\s/.test(navigator.userAgent);
-        return RegExp.$1.split(".")[0];
-    };
+    var queue = [];
 
     /**
-     * determine if we should use the chrome cookie api
-     *
-     * @return bool
+     * @var bool
      */
-    var _useCookieApi = function()
-    {
-        return _getChromeVersion() >= 6;
-    };
-
-    /**
-     * cleans up a cookie value by base 64 decoding it or url decoding it
-     *
-     * @param string
-     * @return string
-     */
-    var _cleanUpCookie = function(cookie)
-    {
-        cookie = decodeURIComponent(cookie);
-
-        // old style of cookies < 0.1475
-        if (Util.strpos(cookie, "\"version") !== false) {
-            return cookie;
-        }
-
-        return Base64.decode(cookie);
-    };
-
-    /**
-     * converts a string to json
-     *
-     * @param string cookie
-     * @return Object
-     */
-    var _convertToJson = function(cookie)
-    {
-        data = JSON.parse(cookie);
-
-        // double encoding going on - fixed in version 2.2
-        if (typeof data === "string") {
-            data = JSON.parse(data);
-        }
-
-        return data;
-    };
-
-    /**
-     * makes an ajax request to the specified url to get the json data and log it to the console
-     *
-     * @param string url
-     * @return void
-     */
-    var _logDataFromUrl = function(url)
-    {
-        var request = new XMLHttpRequest();
-        request.open("GET", url + "?time=" + new Date().getTime());
-        request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-        request.onreadystatechange = function(e) {
-            if (request.readyState == 4) {
-                switch (request.status) {
-                    case 200:
-                        response = request.responseText;
-                        // content was encoded in older versions
-                        if (data.version < "0.1475") {
-                            response = decodeURIComponent(response);
-                        }
-                        data = JSON.parse(response);
-                        return _logData(data);
-                    case 404:
-                        console.warn('404 Page Not Found', url);
-                        break;
-                    case 403:
-                        console.warn('403 Forbidden', url);
-                        break;
-                }
-            }
-        };
-        return request.send();
-    };
-
-    /**
-     * searches for a cookie and passes it off to the cookie handler
-     *
-     * @return void
-     */
-    var _lookForCookie = function()
-    {
-        // in Chrome < 6 we need to get cookies the old fashioned way
-        if (!_useCookieApi()) {
-            cookie = Util.getCookie(cookie_name);
-            return _handleCookie(cookie);
-        }
-
-        request = {
-            name : "cookie",
-            url : document.location.href,
-            cookie_name : cookie_name
-        };
-
-        chrome.extension.sendRequest(request, function(cookie) {
-            if (cookie === null) {
-                return _handleCookie(null);
-            }
-            return _handleCookie(cookie.value);
-        });
-    };
+    var use_queue = true;
 
     /**
      * should we show line numbers?
      *
      * @return bool
      */
-    var _showLineNumbers = function()
+    function _showLineNumbers()
     {
         return local_storage.show_line_numbers == "true";
-    };
+    }
 
     /**
      * should we show upgrade notification messages?
      *
      * @return bool
      */
-    var _showUpgradeMessages = function()
+    function _showUpgradeMessages()
     {
         if (local_storage.show_upgrade_messages === undefined) {
             return true;
         }
         return local_storage.show_upgrade_messages == "true";
-    };
+    }
 
     /**
      * logs nicely formatted data in new format
@@ -168,10 +59,10 @@ var ChromePhpLogger = function()
      * @param Object
      * @return void
      */
-    var _logCleanData = function(data, callback)
+    function _logCleanData(data, callback)
     {
         column_map = {};
-        for (key in data.columns) {
+        for (var key in data.columns) {
             column_name = data.columns[key];
             column_map[column_name] = key;
         }
@@ -185,13 +76,28 @@ var ChromePhpLogger = function()
                 backtrace = row[column_map.backtrace],
                 label = row[column_map.label],
                 log = row[column_map.log],
-                type = row[column_map.type];
+                type = row[column_map.type] || 'log';
 
             if (_showLineNumbers() && backtrace !== null) {
                 console.log(backtrace);
             }
 
             var show_label = label && typeof label === "string";
+
+            if (!label) {
+                label = "";
+            }
+
+            if (log && typeof log === 'object' && log['___class_name']) {
+                show_label = true;
+
+                if (label) {
+                    label += " ";
+                }
+
+                label += log['___class_name'] + ':';
+                delete log['___class_name'];
+            }
 
             switch (type) {
                 case 'group':
@@ -213,38 +119,9 @@ var ChromePhpLogger = function()
                     break;
             }
         }
-        callback();
-    };
 
-    /**
-     * logs data in old format
-     *
-     * @param Object data
-     * @param callback
-     * @return void
-     */
-    var _logDirtyData = function(data, callback)
-    {
-        values = data["data"];
-        backtrace_values = data["backtrace"];
-        label_values = data["labels"];
-
-        var last_backtrace = null;
-        if (values.length) {
-            for (i = 0; i < values.length; ++i) {
-                if (_showLineNumbers() && backtrace_values[i] !== null && last_backtrace != backtrace_values[i]) {
-                    last_backtrace = backtrace_values[i];
-                    console.log(backtrace_values[i]);
-                }
-                if (label_values[i] && typeof label_values[i] === "string") {
-                    console.log(label_values[i], values[i]);
-                } else {
-                    console.log(values[i]);
-                }
-            }
-        }
         callback();
-    };
+    }
 
     /**
      * handles data logging and determining which method to use to log data
@@ -252,89 +129,86 @@ var ChromePhpLogger = function()
      * @param Object data
      * @return void
      */
-    var _logData = function(data)
+    function _logData(data)
     {
-        if (_showUpgradeMessages() && data.version < "2.2.3") {
-            console.warn("you are using version " + data.version + " of the ChromePHP Server Side Library.\nThe latest version is 2.2.3.\nIt is recommended that you upgrade at http://www.chromephp.com");
-        }
-        if (data.version > "0.147") {
-            return _logCleanData(data, _complete);
-        }
-        return _logDirtyData(data, _complete);
-    };
-
-    /**
-     * called when logging is complete
-     *
-     * @return void
-     */
-    var _complete = function()
-    {
-        if (!_useCookieApi()) {
-            Util.eatCookie(cookie_name);
+        if (data.version < "3.0") {
+            console.warn("You are using version " + data.version + " of the ChromePHP Server Side Library.  The latest version of the extension requires version 3.0 or later.  Please upgrade at http://www.chromephp.com.");
             return;
         }
 
-        request = {
-            name : "eatCookie",
-            url : document.location.href,
-            cookie_name : cookie_name
-        };
+        return _logCleanData(data, _complete);
+    }
 
-        chrome.extension.sendRequest(request);
-    };
+    function _complete() {}
+
+    function _processQueue(callback)
+    {
+        for (var i = 0; i < queue.length; ++i) {
+            _process(queue[i]);
+        }
+
+        queue = [];
+        callback();
+    }
 
     /**
-     * handles a cookie value
+     * converts a string to json
      *
-     * @param string
-     * @return void
+     * @param string cookie
+     * @return Object
      */
-    var _handleCookie = function(cookie)
+    function _jsonDecode(json_string)
     {
-        if (cookie === null) {
+        data = JSON.parse(json_string);
+        return data;
+    }
+
+    function _decode(header) {
+        return _jsonDecode(Base64.decode(header));
+    }
+
+    function _process(details) {
+        var headers = details.responseHeaders,
+            match = false,
+            header = '';
+
+        for (var i = 0; i < headers.length; ++i) {
+            if (headers[i].name == HEADER_NAME) {
+                header = headers[i].value;
+                match = true;
+                break;
+            }
+        }
+
+        if (!match) {
             return;
         }
 
-        data = _cleanUpCookie(cookie);
-        data = _convertToJson(data);
+        data = _decode(header);
+        _logData(data);
+    }
 
-        // if there is a uri that means the log data is stored in a file server side
-        // we will make an ajax request to get that data
-        if (data.uri) {
-            if (Util.inArray(data.time, request_times)) {
-                return;
-            }
-            request_times.push(data.time);
-            return _logDataFromUrl(data.uri);
+    function _handleHeaderUpdate(request, sender, sendResponse) {
+        // if this is not a cookie update don't do anything
+        if (request.name != "header_update") {
+            return;
         }
 
-        return _logData(data);
-    };
+        if (use_queue) {
+            queue.push(request.details);
+            return sendResponse("done");
+        }
 
-    var _listenForCookies = function()
-    {
-        chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+        _process(request.details);
+        return sendResponse("done");
+    }
 
-            // if this is not a cookie update don't do anything
-            if (request.name != "cookie_update") {
-                return;
-            }
+    function _listenForLogMessages() {
+        chrome.extension.onRequest.addListener(_handleHeaderUpdate);
+    }
 
-            // if this is a cookie being deleted
-            if (request.info.removed) {
-                return sendResponse("done");
-            }
-
-            // a different cookie is being modified
-            if (request.info.cookie.name != cookie_name) {
-                return sendResponse("done");
-            }
-
-            // if we are here that means this is the ChromePHP cookie and we are good to log
-            _handleCookie(request.info.cookie.value);
-            sendResponse("done");
-        });
+    function _stopListening() {
+        chrome.extension.onRequest.removeListener(_handleHeaderUpdate);
     }
 
     return {
@@ -345,7 +219,9 @@ var ChromePhpLogger = function()
          */
         run : function()
         {
-            return _lookForCookie();
+            _processQueue(function() {
+                use_queue = false;
+            });
         },
 
         /**
@@ -357,9 +233,6 @@ var ChromePhpLogger = function()
         {
             chrome.extension.sendRequest("localStorage", function(response) {
                 local_storage = response;
-                if (_useCookieApi()) {
-                    _listenForCookies();
-                }
                 ChromePhpLogger.run();
             });
         },
@@ -371,15 +244,18 @@ var ChromePhpLogger = function()
          */
         init : function()
         {
+            _listenForLogMessages();
             chrome.extension.sendRequest("isActive", function(response) {
                 if (response === false) {
-                    return;
+                    return _stopListening();
                 }
                 return ChromePhpLogger.initStorage();
             });
         }
     };
 } ();
+
+ChromePhpLogger.init();
 
 /**
  * utility functions used by the logger stuff
@@ -453,7 +329,7 @@ var Util = {
      */
      inArray : function(needle, haystack)
      {
-        for (key in haystack) {
+        for (var key in haystack) {
             if (haystack[key] == needle) {
                 return true;
             }
@@ -461,8 +337,6 @@ var Util = {
         return false;
      }
 };
-
-ChromePhpLogger.init();
 
 /**
  *
@@ -601,4 +475,4 @@ var Base64 = {
         }
         return string;
     }
-}
+};
