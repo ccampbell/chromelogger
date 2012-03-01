@@ -8,7 +8,7 @@ var ChromePhpLogger = function()
     /**
      * @var string
      */
-    var HEADER_NAME = "X-ChromePhp-Data";
+    var HEADER_NAME = "x-chromephp-data";
 
     /**
      * @var object
@@ -173,7 +173,7 @@ var ChromePhpLogger = function()
             header = '';
 
         for (var i = 0; i < headers.length; ++i) {
-            if (headers[i].name == HEADER_NAME) {
+            if (headers[i].name.toLowerCase() == HEADER_NAME) {
                 header = headers[i].value;
                 match = true;
                 break;
