@@ -58,11 +58,13 @@
 
 function save_options()
 {
-    var line_numbers = document.getElementById("show_line_numbers");
-    localStorage["show_line_numbers"] = line_numbers.checked;
 
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    localStorage["show_upgrade_messages"] = upgrade_messages.checked;
+    localStorage["show_line_numbers"] = document.getElementById("show_line_numbers").checked;
+
+    localStorage["show_upgrade_messages"] = document.getElementById("show_upgrade_messages").checked;
+
+    localStorage["expand_object"] = document.getElementById("expand_object").checked;
+  
 
     var info_div = document.getElementById("info");
     info_div.innerHTML = "your settings have been saved";
@@ -80,6 +82,10 @@ function init()
     var upgrade_messages = document.getElementById("show_upgrade_messages");
     upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
 
+    var expand_object = document.getElementById("expand_object");
+    expand_object.checked = localStorage["expand_object"] == "true" ? true : false;
+
+
     if (localStorage["show_upgrade_messages"] === undefined) {
         upgrade_messages.checked = true;
     }
@@ -94,6 +100,12 @@ function restore_defaults()
     var upgrade_messages = document.getElementById("show_upgrade_messages");
     localStorage["show_upgrade_messages"] = true;
     upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
+
+    var expand_object = document.getElementById("expand_object");
+    localStorage['expand_object'] = false; 
+    expand_object.checked = localStorage["expand_object"] == "true" ? true : false;
+
+
 }
 
 </script>
@@ -115,6 +127,12 @@ function restore_defaults()
         <label>
             show upgrade messages:
             <input type="checkbox" id="show_upgrade_messages" name="show_upgrade_messages">
+        </label>
+
+        <p class="info">expand object when displaying the object</p>
+        <label>
+            expand object
+            <input type="checkbox" id="expand_object" name="expand_object">
         </label>
         <div>
             <button onclick="save_options()">Save Changes</button>
