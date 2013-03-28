@@ -96,7 +96,7 @@
             chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
             chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
-            chrome.webRequest.onResponseStarted.addListener(function(details) {
+            chrome.webRequest.onCompleted.addListener(function(details) {
                 chrome.tabs.getSelected(null, function(tab) {
                     chrome.tabs.sendRequest(tab.id, {name: "header_update", details: details});
                 });
