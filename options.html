@@ -22,7 +22,7 @@
             overflow: hidden;
         }
         header h1 {
-            margin-top: 40px;
+            margin: 4px 0px 0px 0px;
         }
         header img {
             float: left;
@@ -54,54 +54,13 @@
             font-size: .8em;
         }
     </style>
-<script type="text/javascript">
 
-function save_options()
-{
-    var line_numbers = document.getElementById("show_line_numbers");
-    localStorage["show_line_numbers"] = line_numbers.checked;
-
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    localStorage["show_upgrade_messages"] = upgrade_messages.checked;
-
-    var info_div = document.getElementById("info");
-    info_div.innerHTML = "your settings have been saved";
-    info_div.style.display = "block";
-    setTimeout(function() {
-        info_div.style.display = "none";
-    }, 2000);
-}
-
-function init()
-{
-    var line_numbers = document.getElementById("show_line_numbers");
-    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
-
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
-
-    if (localStorage["show_upgrade_messages"] === undefined) {
-        upgrade_messages.checked = true;
-    }
-}
-
-function restore_defaults()
-{
-    var line_numbers = document.getElementById("show_line_numbers");
-    localStorage["show_line_numbers"] = false;
-    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
-
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    localStorage["show_upgrade_messages"] = true;
-    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
-}
-
-</script>
+    <script src="chromelogger-options.js"></script>
 </head>
-<body onload="init()">
+<body>
     <header>
-        <img src="http://www.chromephp.com/assets/img/icon128.png" alt="logo">
-        <h1 class="mono">ChromePhp Options</h1>
+        <img src="icon48.png" alt="logo">
+        <h1 class="mono">Chrome Logger Options</h1>
     </header>
     <div class="content">
         <div id="info"></div>
@@ -117,8 +76,8 @@ function restore_defaults()
             <input type="checkbox" id="show_upgrade_messages" name="show_upgrade_messages">
         </label>
         <div>
-            <button onclick="save_options()">Save Changes</button>
-            <button onclick="restore_defaults()">Restore Defaults</button>
+            <button id="save">Save Changes</button>
+            <button id="restore">Restore Defaults</button>
         </div>
     </div>
 </body>
