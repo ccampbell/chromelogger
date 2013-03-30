@@ -10,7 +10,7 @@
     /**
      * @var string
      */
-    var HEADER_NAME = "x-chromephp-data";
+    var HEADER_NAMES = ['x-chromelogger-data', 'x-chromephp-data'];
 
     /**
      * @var object
@@ -171,7 +171,7 @@
             header = '';
 
         for (var i = 0; i < headers.length; i++) {
-            if (headers[i].name.toLowerCase() == HEADER_NAME) {
+            if (HEADER_NAMES.indexOf(headers[i].name.toLowerCase()) !== -1) {
                 header = headers[i].value;
                 match = true;
                 break;
