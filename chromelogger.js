@@ -17,7 +17,7 @@
      */
     function _handleIconClick(tab) {
         if (_tabIsChrome(tab)) {
-            return alert('You cannot use ChromePHP on this page.');
+            return alert('You cannot use Chrome Logger on this page.');
         }
         _toggleDomain(tab);
     }

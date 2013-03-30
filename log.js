@@ -34,7 +34,7 @@
      */
     function _showLineNumbers()
     {
-        return local_storage.show_line_numbers == "true";
+        return local_storage.show_line_numbers === "true";
     }
 
     /**
@@ -47,7 +47,7 @@
         if (local_storage.show_upgrade_messages === undefined) {
             return true;
         }
-        return local_storage.show_upgrade_messages == "true";
+        return local_storage.show_upgrade_messages === "true";
     }
 
     /**
@@ -56,7 +56,7 @@
      * @param Object
      * @return void
      */
-    function _logCleanData(data, callback)
+    function _logData(data, callback)
     {
         var column_map = {};
         var column_name;
@@ -119,23 +119,9 @@
             }
         }
 
-        callback();
-    }
-
-    /**
-     * handles data logging and determining which method to use to log data
-     *
-     * @param Object data
-     * @return void
-     */
-    function _logData(data)
-    {
-        if (data.version < "3.0") {
-            console.warn("You are using version " + data.version + " of the ChromePHP Server Side Library.  The latest version of the extension requires version 3.0 or later.  Please upgrade at http://www.chromephp.com.");
-            return;
+        if (typeof callback === 'function') {
+            callback();
         }
-
-        return _logCleanData(data, _complete);
     }
 
     function _complete() {}
