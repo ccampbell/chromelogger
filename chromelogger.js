@@ -49,13 +49,13 @@
 
     function _activate(tabId) {
         active = true;
-        _enableIcon(tabId);
+        _enableIcon();
         _activateTitle(tabId);
     }
 
     function _deactivate(tabId) {
         active = false;
-        _disableIcon(tabId);
+        _disableIcon();
         _deactivateTitle(tabId);
     }
 
@@ -78,17 +78,15 @@
         });
     }
 
-    function _enableIcon(tabId) {
+    function _enableIcon() {
         chrome.browserAction.setIcon({
-            path: "icon48.png",
-            tabId: tabId
+            path: "icon48.png"
         });
     }
 
-    function _disableIcon(tabId) {
+    function _disableIcon() {
         chrome.browserAction.setIcon({
-            path: "icon48_disabled.png",
-            tabId: tabId
+            path: "icon48_disabled.png"
         });
     }
 
