@@ -1,5 +1,6 @@
 window.ChromePhp = (function () {
-    active = false;
+    var active = false;
+    var inactiveSuffix = ' (inactive)';
 
     /**
      * determines if this tab is a chrome tab in which case the extension cannot run
@@ -24,11 +25,11 @@ window.ChromePhp = (function () {
         url = _getTopLevelDomain(url);
         if (_domainIsActive(url)) {
             localStorage[url] = false;
-            _deactivate();
+            _deactivate(tab.id);
             return;
         }
         localStorage[url] = true;
-        _activate();
+        _activate(tab.id);
     }
 
     function _getTopLevelDomain(url)
@@ -47,45 +48,71 @@ window.ChromePhp = (function () {
         return localStorage[url] == "true";
     }
 
-    function _activate()
+    function _activate(tabId)
     {
+        console.log('activate', tabId);
         active = true;
-        _enableIcon();
+        _enableIcon(tabId);
+        _activateTitle(tabId);
     }
 
-    function _deactivate()
+    function _deactivate(tabId)
     {
+        console.log('deactivate', tabId);
         active = false;
-        _disableIcon();
+        _disableIcon(tabId);
+        _deactivateTitle(tabId);
     }
 
-    function _enableIcon()
+    function _activateTitle(tabId)
     {
-        chrome.browserAction.setIcon({
-            path: "new48.png"
+        chrome.browserAction.getTitle({tabId: tabId}, function(title) {
+            chrome.browserAction.setTitle({
+                title: title.replace(inactiveSuffix, ''),
+                tabId: tabId
+            });
         });
     }
 
-    function _disableIcon()
+    function _deactivateTitle(tabId)
     {
-        chrome.browserAction.setIcon({
-            path: "new48_disabled.png"
+        chrome.browserAction.getTitle({tabId: tabId}, function(title) {
+            chrome.browserAction.setTitle({
+                title: title.indexOf(inactiveSuffix) === -1 ? title + inactiveSuffix : title,
+                tabId: tabId
+            });
         });
     }
 
-    function _handleTabUpdate(tab_id)
+    function _enableIcon(tabId)
     {
-        chrome.tabs.get(tab_id, function (tab) {
+        chrome.browserAction.setIcon({
+            path: "icon48.png",
+            tabId: tabId
+        });
+    }
+
+    function _disableIcon(tabId)
+    {
+        chrome.browserAction.setIcon({
+            path: "icon48_disabled.png",
+            tabId: tabId
+        });
+    }
+
+    function _handleTabUpdate(tabId)
+    {
+        chrome.tabs.get(tabId, function (tab) {
             if (_tabIsChrome(tab)) {
-                return _deactivate();
+                return _deactivate(tabId);
             }
 
             domain = _getTopLevelDomain(tab.url);
             if (_domainIsActive(domain)) {
-                return _activate();
+                return _activate(tabId);
             }
 
-            _deactivate();
+            _deactivate(tabId);
         })
     }
 
@@ -96,7 +123,6 @@ window.ChromePhp = (function () {
         chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
         chrome.webRequest.onResponseStarted.addListener(function(details) {
-            console.log(details);
             chrome.tabs.getSelected(null, function(tab) {
                 chrome.tabs.sendRequest(tab.id, {name: "header_update", details: details});
             });
