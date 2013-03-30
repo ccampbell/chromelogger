@@ -112,11 +112,11 @@
 
         chrome.webRequest.onResponseStarted.addListener(function(details) {
             chrome.tabs.getSelected(null, function(tab) {
-                chrome.tabs.sendRequest(tab.id, {name: "header_update", details: details});
+                chrome.tabs.sendMessage(tab.id, {name: "header_update", details: details});
             });
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
-        chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+        chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
             if (request === "localStorage") {
                 return sendResponse(localStorage);
             }

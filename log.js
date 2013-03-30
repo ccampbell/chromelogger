@@ -188,11 +188,11 @@
     }
 
     function _listenForLogMessages() {
-        chrome.extension.onRequest.addListener(_handleHeaderUpdate);
+        chrome.extension.onMessage.addListener(_handleHeaderUpdate);
     }
 
     function _stopListening() {
-        chrome.extension.onRequest.removeListener(_handleHeaderUpdate);
+        chrome.extension.onMessage.removeListener(_handleHeaderUpdate);
     }
 
     function _run() {
@@ -202,7 +202,7 @@
     }
 
     function _initStorage() {
-        chrome.extension.sendRequest("localStorage", function(response) {
+        chrome.extension.sendMessage("localStorage", function(response) {
             local_storage = response;
             _run();
         });
@@ -210,7 +210,7 @@
 
     function _init() {
         _listenForLogMessages();
-        chrome.extension.sendRequest("isActive", function(response) {
+        chrome.extension.sendMessage("isActive", function(response) {
             if (response === false) {
                 return _stopListening();
             }
