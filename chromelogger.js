@@ -5,6 +5,9 @@
     var active = false;
     var inactiveSuffix = ' (inactive)';
 
+    // list of all tabs with chrome logger enabled
+    var tabsWithExtensionEnabled = [];
+
     /**
      * determines if this tab is a chrome tab in which case the extension cannot run
      */
@@ -49,18 +52,28 @@
 
     function _activate(tabId) {
         active = true;
+
+        if (tabsWithExtensionEnabled.indexOf(tabId) === -1) {
+            tabsWithExtensionEnabled.push(tabId);
+        }
+
         _enableIcon();
         _activateTitle(tabId);
     }
 
     function _deactivate(tabId) {
         active = false;
+
+        var index = tabsWithExtensionEnabled.indexOf(tabId);
+        if (index !== -1) {
+            tabsWithExtensionEnabled.splice(index, 1);
+        }
+
         _disableIcon();
         _deactivateTitle(tabId);
     }
 
-    function _activateTitle(tabId)
-    {
+    function _activateTitle(tabId) {
         chrome.browserAction.getTitle({tabId: tabId}, function(title) {
             chrome.browserAction.setTitle({
                 title: title.replace(inactiveSuffix, ''),
@@ -110,10 +123,10 @@
         chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
         chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
-        chrome.webRequest.onResponseStarted.addListener(function(details) {
-            chrome.tabs.getSelected(null, function(tab) {
-                chrome.tabs.sendMessage(tab.id, {name: "header_update", details: details});
-            });
+        chrome.webRequest.onResponseStarted.addListener(function (details) {
+            if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
+                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details});
+            }
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
         chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
