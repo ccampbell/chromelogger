@@ -17,6 +17,16 @@
      */
     var local_storage = null;
 
+    var ALLOWED_TYPES = {
+        'group': 1,
+        'groupEnd': 1,
+        'groupCollapsed': 1,
+        'warn': 1,
+        'error': 1,
+        'info': 1,
+        'log': 1
+    };
+
     /**
      * @var array
      */
@@ -35,19 +45,6 @@
     function _showLineNumbers()
     {
         return local_storage.show_line_numbers === "true";
-    }
-
-    /**
-     * should we show upgrade notification messages?
-     *
-     * @return bool
-     */
-    function _showUpgradeMessages()
-    {
-        if (local_storage.show_upgrade_messages === undefined) {
-            return true;
-        }
-        return local_storage.show_upgrade_messages === "true";
     }
 
     /**
@@ -70,7 +67,7 @@
             i = 0,
             length = rows.length;
 
-        for (i = 0; i < length; ++i) {
+        for (i = 0; i < length; i++) {
             var row = rows[i],
                 backtrace = row[column_map.backtrace],
                 label = row[column_map.label],
@@ -78,45 +75,63 @@
                 type = row[column_map.type] || 'log';
 
             if (_showLineNumbers() && backtrace !== null) {
-                console.log(backtrace);
+                console.log("%c" + backtrace, "color: #898989; font-weight: bold;");
             }
 
-            var show_label = label && typeof label === "string";
-
-            if (!label) {
-                label = "";
+            // new version without label
+            var new_version = false;
+            if (data.columns.indexOf('label') === -1) {
+                new_version = true;
             }
 
-            if (log && typeof log === 'object' && log['___class_name']) {
-                show_label = true;
+            // if this is the old version do some converting
+            if (!new_version) {
+                var show_label = label && typeof label === "string";
 
-                if (label) {
-                    label += " ";
+                log = [log];
+
+                if (show_label) {
+                    log.unshift(label);
+                }
+            }
+
+            var logs = [];
+            var current_log;
+            var last_log;
+            var new_string;
+
+            // loop through logs to add in any class name labels that should be here
+            for (var j = 0; j < log.length; j++) {
+                current_log = log[j];
+                last_log = logs[logs.length - 1];
+
+                if (typeof current_log === 'object' && current_log['___class_name']) {
+                    new_string = "%c" + current_log['___class_name'];
+
+                    if (typeof last_log === 'string') {
+
+                        // if the last log was a string we need to append to it
+                        // in order for the coloring to work correctly
+                        logs[logs.length - 1] = last_log + ' ' + new_string;
+                    }
+                    else {
+
+                        // otherwise just push the new string to the end of the list
+                        logs.push(new_string);
+                    }
+
+                    logs.push('color: #0563ad; font-weight: bold;');
+                    delete log[j]['___class_name'];
                 }
 
-                label += log['___class_name'] + ':';
-                delete log['___class_name'];
+                logs.push(current_log);
             }
 
-            switch (type) {
-                case 'group':
-                case 'groupEnd':
-                case 'groupCollapsed':
-                    console[type](log);
-                    break;
-                default:
-                    type = 'log';
-                case 'warn':
-                case 'error':
-                case 'info':
-                case 'log':
-                    if (show_label) {
-                        console[type](label, log);
-                        break;
-                    }
-                    console[type](log);
-                    break;
+            if (!(type in ALLOWED_TYPES)) {
+                type = 'log';
             }
+
+            console[type].apply(console, logs);
         }
 
         if (typeof callback === 'function') {
@@ -167,6 +182,7 @@
         }
 
         var data = _decode(header);
+
         _logData(data);
     }
 
