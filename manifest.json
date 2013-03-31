@@ -5,7 +5,7 @@
         {
             "matches": ["http://*/*", "https://*/*"],
             "js": ["base64.js", "log.js"],
-            "run_at": "document_end"
+            "run_at": "document_start"
         }
     ],
     "background": {
@@ -20,7 +20,7 @@
     "description": "For server side logging and debugging in chrome console.",
     "browser_action": {
         "default_icon": "icon48_disabled.png",
-        "default_title": "Chrome Logger 4.0"
+        "default_title": "Chrome Logger"
     },
     "minimum_chrome_version": "17",
     "manifest_version": 2,
