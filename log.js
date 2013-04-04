@@ -16,6 +16,8 @@
      * @var object
      */
     var local_storage = null;
+    var color1 = '#888';
+    var color2 = '#0563ad';
 
     var ALLOWED_TYPES = {
         'group': 1,
@@ -75,7 +77,7 @@
                 type = row[column_map.type] || 'log';
 
             if (_showLineNumbers() && backtrace !== null) {
-                console.log("%c" + backtrace, "color: #898989; font-weight: bold;");
+                console.log('%c' + backtrace, 'color: ' + color1 + '; font-weight: bold;');
             }
 
             // new version without label
@@ -106,7 +108,7 @@
                 last_log = logs[logs.length - 1];
 
                 if (typeof current_log === 'object' && current_log['___class_name']) {
-                    new_string = "%c" + current_log['___class_name'];
+                    new_string = '%c' + current_log['___class_name'];
 
                     if (typeof last_log === 'string') {
 
@@ -120,7 +122,7 @@
                         logs.push(new_string);
                     }
 
-                    logs.push('color: #0563ad; font-weight: bold;');
+                    logs.push('color: ' + color2 + '; font-weight: bold;');
                     delete log[j]['___class_name'];
                 }
 
@@ -218,6 +220,8 @@
     function _initStorage() {
         chrome.extension.sendMessage("localStorage", function(response) {
             local_storage = response;
+            color1 = 'color1' in local_storage ? local_storage['color1'] : color1;
+            color2 = 'color2' in local_storage ? local_storage['color2'] : color2;
             _run();
         });
     }
