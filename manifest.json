@@ -19,7 +19,7 @@
     },
     "description": "For server side logging and debugging in chrome console.",
     "browser_action": {
-        "default_icon": "icon48_disabled.png",
+        "default_icon": "icon38_disabled.png",
         "default_title": "Chrome Logger"
     },
     "minimum_chrome_version": "17",
