@@ -93,13 +93,13 @@
 
     function _enableIcon() {
         chrome.browserAction.setIcon({
-            path: "icon48.png"
+            path: "icon38.png"
         });
     }
 
     function _disableIcon() {
         chrome.browserAction.setIcon({
-            path: "icon48_disabled.png"
+            path: "icon38_disabled.png"
         });
     }
 
