@@ -2,7 +2,7 @@
 
 This is the official repository of the Chrome Logger extension for Google Chrome.
 
-## URLs
+### Links
 
 - Official Site - http://chromelogger.com
 - Tech Spec - http://craig.is/writing/chromelogger/techspecs
