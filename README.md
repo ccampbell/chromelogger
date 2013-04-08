@@ -7,7 +7,7 @@ This is the official repository of the Chrome Logger extension for Google Chrome
 - Official Site - http://chromelogger.com
 - Tech Spec - http://craig.is/writing/chromelogger/techspecs
 - Chrome Web Store - https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
-- 
+
 ## Libraries
 
 This is a list of available server side libraries
