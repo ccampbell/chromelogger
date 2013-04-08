@@ -2,23 +2,18 @@
 
 This is the official repository of the Chrome Logger extension for Google Chrome.
 
-It is available to install at  
-https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
+## URLS
 
-More information is available at  
-[http://chromelogger.com](http://chromelogger.com)
+- Extension installation - https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
+- Official Site - http://chromelogger.com
+- Tech Spec - http://craig.is/writing/chromelogger/techspecs
 
 ## Libraries
 
 This is a list of available server side libraries
 
-- Python - [http://github.com/ccampbell/chromelogger-python](http://github.com/ccampbell/chromelogger-python)
-- PHP - [http://github.com/ccampbell/chromephp](http://github.com/ccampbell/chromephp)
-
-## Technical Specification
-
-If you are looking to develop your own library read over the tech spec here:  
-[http://craig.is/writing/chromelogger/techspecs](http://craig.is/writing/chromelogger/techspecs)
+- Python - http://github.com/ccampbell/chromelogger-python
+- PHP - http://github.com/ccampbell/chromephp
 
 ## Development
 
