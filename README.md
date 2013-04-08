@@ -2,7 +2,7 @@
 
 This is the official repository of the Chrome Logger extension for Google Chrome.
 
-## URLS
+## URLs
 
 - Extension installation - https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
 - Official Site - http://chromelogger.com
