@@ -14,6 +14,7 @@ This is a list of available server side libraries
 
 - Python - http://github.com/ccampbell/chromelogger-python
 - PHP - http://github.com/ccampbell/chromephp
+- Ruby - https://github.com/cookrn/chrome_logger
 
 ## Development
 
