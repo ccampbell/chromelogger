@@ -1,33 +1,53 @@
 <html>
 <head>
-    <title>ChromePhp options</title>
+    <title>Chrome Logger options</title>
     <style>
         body {
             font-family: helvetica, sans-serif;
             width: 800px;
             margin: auto;
         }
-        .mono {
-            font-family: 'monaco', monospace;
+
+        h1 {
+            font-weight: normal;
         }
+
+        form {
+            margin: 0;
+        }
+
+        .swatch {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #555;
+            top: 2px;
+            height: 12px;
+            width: 12px;
+        }
+
         #info {
             color: red;
+            padding-top: 10px;
             display: none;
-            margin-bottom: 10px;
+            text-align: right;
         }
+
         header {
             width: 488px;
             margin: auto;
             margin-top: 20px;
             overflow: hidden;
         }
+
         header h1 {
-            margin-top: 40px;
+            margin: 4px 0px 0px 0px;
         }
+
         header img {
             float: left;
             margin-right: 20px;
         }
+
         .content {
             width: 400px;
             margin: auto;
@@ -37,107 +57,80 @@
             padding: 15px;
             border: 2px solid #999;
             overflow: hidden;
+            /*transition: all 0.5s ease-in-out;*/
         }
+
         p {
-            margin: 0px;
+            margin: 0px 0px 20px 0px;
+            color: #888;
             padding: 0px;
         }
+
         input {
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
+
+        .buttons {
+            overflow: hidden;
+        }
+
         button {
             float: right;
             margin-left: 10px;
         }
+
         p.info {
             font-size: .8em;
         }
     </style>
-<script type="text/javascript">
 
-function save_options()
-{
-
-    localStorage["show_line_numbers"] = document.getElementById("show_line_numbers").checked;
-
-    localStorage["show_upgrade_messages"] = document.getElementById("show_upgrade_messages").checked;
-
-    localStorage["expand_object"] = document.getElementById("expand_object").checked;
-  
-
-    var info_div = document.getElementById("info");
-    info_div.innerHTML = "your settings have been saved";
-    info_div.style.display = "block";
-    setTimeout(function() {
-        info_div.style.display = "none";
-    }, 2000);
-}
-
-function init()
-{
-    var line_numbers = document.getElementById("show_line_numbers");
-    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
-
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
-
-    var expand_object = document.getElementById("expand_object");
-    expand_object.checked = localStorage["expand_object"] == "true" ? true : false;
-
-
-    if (localStorage["show_upgrade_messages"] === undefined) {
-        upgrade_messages.checked = true;
-    }
-}
-
-function restore_defaults()
-{
-    var line_numbers = document.getElementById("show_line_numbers");
-    localStorage["show_line_numbers"] = false;
-    line_numbers.checked = localStorage["show_line_numbers"] == "true" ? true : false;
-
-    var upgrade_messages = document.getElementById("show_upgrade_messages");
-    localStorage["show_upgrade_messages"] = true;
-    upgrade_messages.checked = localStorage["show_upgrade_messages"] == "true" ? true : false;
-
-    var expand_object = document.getElementById("expand_object");
-    localStorage['expand_object'] = false; 
-    expand_object.checked = localStorage["expand_object"] == "true" ? true : false;
-
-
-}
-
-</script>
+    <script src="chromelogger-options.js"></script>
 </head>
-<body onload="init()">
+<body>
     <header>
-        <img src="http://www.chromephp.com/assets/img/icon128.png" alt="logo">
-        <h1 class="mono">ChromePhp Options</h1>
+        <img src="icon48.png" alt="logo">
+        <h1>Chrome Logger Options</h1>
     </header>
     <div class="content">
-        <div id="info"></div>
-        <p class="info">show the filenames and line numbers where your calls originated</p>
-        <label>
-            show line numbers:
-            <input type="checkbox" id="show_line_numbers" name="show_line_numbers">
-        </label>
+        <form>
+            <label>
+                show line numbers:
+                <input type="checkbox" name="show_line_numbers">
+            </label>
+            <p class="info">show the filenames and line numbers where your calls originated</p>
 
-        <p class="info">show upgrade messages when your server side library is out of date</p>
-        <label>
-            show upgrade messages:
-            <input type="checkbox" id="show_upgrade_messages" name="show_upgrade_messages">
-        </label>
+            <label>
+                show upgrade messages:
+                <input type="checkbox" name="show_upgrade_messages">
+            </label>
+            <p class="info">show upgrade messages when your server side library is out of date</p>
 
-        <p class="info">expand object when displaying the object</p>
-        <label>
-            expand object
-            <input type="checkbox" id="expand_object" name="expand_object">
-        </label>
-        <div>
-            <button onclick="save_options()">Save Changes</button>
-            <button onclick="restore_defaults()">Restore Defaults</button>
-        </div>
+            <label>
+                expand object
+                <input type="checkbox" id="expand_object" name="expand_object">
+            </label>
+            <p class="info">expand object when displaying the object</p> 
+
+
+            <label>
+                color 1:
+                <input type="text" name="color1" value=""> <span class="swatch"></span>
+            </label>
+            <p class="info">color used for line numbers</p>
+
+            <label>
+                color 2:
+                <input type="text" name="color2" value=""> <span class="swatch"></span>
+            </label>
+            <p class="info">color used for class names</p>
+
+            <div class="buttons">
+                <button id="save">Save Changes</button>
+                <button id="restore">Restore Defaults</button>
+            </div>
+
+            <div id="info"></div>
+        </form>
     </div>
 </body>
 </html>
