@@ -27,8 +27,12 @@
     "permissions":
     [
         "webRequest",
+        "notifications",
         "tabs",
         "http://*/*",
         "https://*/*"
+    ],
+    "web_accessible_resources": [
+        "icon48.png"
     ]
 }

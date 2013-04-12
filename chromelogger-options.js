@@ -5,6 +5,8 @@
     var defaults = {
         show_upgrade_messages: true,
         show_line_numbers: false,
+        toast_warnings: false,
+        toast_errors: false,
         color1: "#888",
         color2: "#0563ad"
     };

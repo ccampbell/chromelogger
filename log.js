@@ -49,10 +49,27 @@
         return local_storage.show_line_numbers === "true";
     }
 
+
+    function _toastWarnings()
+    {
+        return local_storage.toast_warnings === "true";
+    }
+
+    function _toastErrors()
+    {
+        return local_storage.toast_errors === "true";
+    }
+
+    function _toast(type, logs) {
+        var message = logs[logs.length - 1].substr(0, 50);
+        chrome.extension.sendMessage({type: 'toast', toastType: type, message: message});
+    }
+
     /**
      * logs nicely formatted data in new format
      *
-     * @param Object
+     * @param data Object
+     * @param callback function
      * @return void
      */
     function _logData(data, callback)
@@ -61,12 +78,14 @@
         var column_name;
 
         for (var key in data.columns) {
-            column_name = data.columns[key];
-            column_map[column_name] = key;
+            if (data.columns.hasOwnProperty(key)) {
+                column_name = data.columns[key];
+                column_map[column_name] = key;
+            }
         }
 
         var rows = data.rows,
-            i = 0,
+            i,
             length = rows.length;
 
         for (i = 0; i < length; i++) {
@@ -110,11 +129,6 @@
                 last_log = logs[logs.length - 1];
 
 
-                if (_expandObject()) {
-                    log = _dumpObject(log);
-                }
-
-
                 if (typeof current_log === 'object' && current_log['___class_name']) {
                     new_string = '%c' + current_log['___class_name'];
 
@@ -141,8 +155,10 @@
             }
 
             console[type].apply(console, logs);
-            if (type == 'warn') {
-                
+            if (type == 'warn' && _toastWarnings()) {
+                _toast('Warning', logs)
+            } else if (type == 'error' && _toastErrors()) {
+                _toast('Error', logs)
             }
         }
 
@@ -151,92 +167,6 @@
         }
     }
 
-
-    function _addSpaces(depth)
-    {
-        var spaces = "";
-        for (var i = 0; i < depth; i++)
-        {
-            spaces += "  ";
-        }
-        return spaces;
-    }
-
-    function _dumpObject(object, depth, addNewLine)
-    {
-        depth = depth || 0;
-        addNewLine = addNewLine || false;
-        var newline = false, 
-            dump = '',
-            content = '',
-            item,
-            key;
-
-        if (typeof(object) == "undefined")
-        {
-            dump += "undefined";
-        }
-        else if (typeof(object) == "boolean" || typeof(object) == "number")
-        {
-            dump += object.toString();
-        }
-        else if (typeof(object) == "string")
-        {
-            dump += '"' + object + '"';
-        }
-        else if (object == null)
-        {
-            dump += "null"
-        }
-        else if (object instanceof(Array))
-        {
-            if (object.length > 0)
-            {
-                if (addNewLine)
-                {
-                    newline = true
-                } 
-                for (item in object)
-                {
-                    if (object.hasOwnProperty(item))
-                    {
-                        content += _dumpObject(object[item], depth + 1) + ",\n" + _addSpaces(depth + 1);
-                    }
-                }
-                content = content.replace(/,\n\s*$/, "").replace(/^\s*/, "");
-                dump += "[ " + content + "\n" + spacer(depth) + "]";
-            } else {
-                dump += "[]"
-            }
-        }
-        else if (typeof(object) == "object")
-        {
-            if (Object.keys(object).length > 0)
-            {
-                if (addNewLine)
-                {
-                    newline = true
-                }
-                for (key in object)
-                {
-                    if (object.hasOwnProperty(key))
-                    {
-                        content += spacer(depth + 1) + key.toString() + ": " + _dumpObject(object[key], depth + 2, true) + ",\n";
-                    }
-                }
-                content = content.replace(/,\n\s*$/, "").replace(/^\s+/, "");
-                dump += "{ " + content + "\n" + spacer(depth) + "}";
-            } else {
-                dump += "{}";
-            }
-        }
-        else
-        {
-            dump += object.toString()
-        }
-
-        return ((newline ? "\n" + spacer(depth) : "") + dump)
-    }
 
     function _processQueue(callback)
     {
@@ -251,7 +181,7 @@
     /**
      * converts a string to json
      *
-     * @param string cookie
+     * @param json_string string
      * @return Object
      */
     function _jsonDecode(json_string)
@@ -315,7 +245,7 @@
     }
 
     function _initStorage() {
-        chrome.extension.sendMessage("localStorage", function(response) {
+        chrome.extension.sendMessage({type: "localStorage"}, function(response) {
             local_storage = response;
             color1 = 'color1' in local_storage ? local_storage['color1'] : color1;
             color2 = 'color2' in local_storage ? local_storage['color2'] : color2;
@@ -325,7 +255,7 @@
 
     function _init() {
         _listenForLogMessages();
-        chrome.extension.sendMessage("isActive", function(response) {
+        chrome.extension.sendMessage({type: "isActive"}, function(response) {
             if (response === false) {
                 return _stopListening();
             }
