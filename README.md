@@ -18,6 +18,7 @@ This is a list of available server side libraries
 - Node.js
  - https://github.com/olahol/express-chrome-logger
  - https://github.com/yannickcr/node-chromelogger
+- .NET - https://github.com/ChrisMissal/chromelogger
 
 ## Development
 
