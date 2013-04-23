@@ -128,8 +128,7 @@
                 current_log = log[j];
                 last_log = logs[logs.length - 1];
 
-
-                if (typeof current_log === 'object' && current_log['___class_name']) {
+                if (current_log && typeof current_log === 'object' && current_log['___class_name']) {
                     new_string = '%c' + current_log['___class_name'];
 
                     if (typeof last_log === 'string') {
@@ -137,8 +136,8 @@
                         // if the last log was a string we need to append to it
                         // in order for the coloring to work correctly
                         logs[logs.length - 1] = last_log + ' ' + new_string;
-                    } else {
-
+                    }
+                    else {
                         // otherwise just push the new string to the end of the list
                         logs.push(new_string);
                     }
