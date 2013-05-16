@@ -18,6 +18,8 @@
     var local_storage = null;
     var color1 = '#888';
     var color2 = '#0563ad';
+    var toastCount = 0;
+
 
     var ALLOWED_TYPES = {
         'group': 1,
@@ -60,9 +62,17 @@
         return local_storage.toast_errors === "true";
     }
 
+    function _maxToastCount()
+    {
+        return parseInt(local_storage.max_toast_count);
+    }
+
     function _toast(type, logs) {
-        var message = logs[logs.length - 1].substr(0, 50);
-        chrome.extension.sendMessage({type: 'toast', toastType: type, message: message});
+
+        if (toastCount++ < _maxToastCount()) {
+            var message = logs[logs.length - 1].substr(0, 50);
+            chrome.extension.sendMessage({type: 'toast', toastType: type, message: message});
+        }
     }
 
     /**

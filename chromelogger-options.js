@@ -7,6 +7,7 @@
         show_line_numbers: false,
         toast_warnings: false,
         toast_errors: false,
+        max_toast_count: 4,
         color1: "#888",
         color2: "#0563ad"
     };
