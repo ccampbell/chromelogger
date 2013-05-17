@@ -20,7 +20,6 @@
     var color2 = '#0563ad';
     var toastCount = 0;
 
-
     var ALLOWED_TYPES = {
         'group': 1,
         'groupEnd': 1,
@@ -147,8 +146,8 @@
                         // if the last log was a string we need to append to it
                         // in order for the coloring to work correctly
                         logs[logs.length - 1] = last_log + ' ' + new_string;
-                    } else {
-
+                    }
+                    else {
                         // otherwise just push the new string to the end of the list
                         logs.push(new_string);
                     }
