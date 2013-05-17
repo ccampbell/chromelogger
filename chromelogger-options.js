@@ -32,10 +32,10 @@
 
         getInputs().forEach(function(input) {
             if (input.type == 'text') {
-                localStorage[input.name] = _getColorFromValue(input.value);
-                return;
+                localStorage[input.name] = input.id !== 'max_toast_count' ? _getColorFromValue(input.value) : input.value;
+            } else {
+                localStorage[input.name] = input.checked;
             }
-            localStorage[input.name] = input.checked;
         });
 
         showMessage('your settings have been saved');
@@ -55,9 +55,11 @@
     }
 
     function _setInputValue(input, value) {
-        input.value = value.indexOf('#') === 0 ? value.substring(1) : value;
-
-        input.parentNode.querySelector('.swatch').style.background = _getColorFromValue(value);
+        input.value = (typeof value === 'string' && value.indexOf('#') === 0) ? value.substring(1) : value;
+        var swatch = input.parentNode.querySelector('.swatch');
+        if (swatch) {
+            swatch.style.background = _getColorFromValue(value);
+        }
     }
 
     function restoreDefaults(e) {

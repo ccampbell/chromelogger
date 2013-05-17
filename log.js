@@ -69,7 +69,10 @@
     function _toast(type, logs) {
 
         if (toastCount++ < _maxToastCount()) {
-            var message = logs[logs.length - 1].substr(0, 50);
+            var message = logs[logs.length - 1].message;
+            if (message.length > 100) {
+                message = message.substr(0,100) + '...';
+            }
             chrome.extension.sendMessage({type: 'toast', toastType: type, message: message});
         }
     }
