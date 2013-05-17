@@ -130,13 +130,24 @@
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
         chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
-            if (request === "localStorage") {
+            if (request.type === "localStorage") {
                 return sendResponse(localStorage);
             }
 
-            if (request === "isActive") {
+            if (request.type === "isActive") {
                 return sendResponse(active);
             }
+            if (request.type == 'toast') {
+                var notification = webkitNotifications.createNotification(
+                    'icon48.png',  // icon url - can be relative
+                    request.toastType,  // notification title
+                    request.message
+                );
+
+                // Then show the notification.
+                notification.show();
+            }
+
         });
     }
 

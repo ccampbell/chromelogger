@@ -18,6 +18,7 @@
     var local_storage = null;
     var color1 = '#888';
     var color2 = '#0563ad';
+    var toastCount = 0;
 
     var ALLOWED_TYPES = {
         'group': 1,
@@ -49,10 +50,38 @@
         return local_storage.show_line_numbers === "true";
     }
 
+
+    function _toastWarnings()
+    {
+        return local_storage.toast_warnings === "true";
+    }
+
+    function _toastErrors()
+    {
+        return local_storage.toast_errors === "true";
+    }
+
+    function _maxToastCount()
+    {
+        return parseInt(local_storage.max_toast_count);
+    }
+
+    function _toast(type, logs) {
+
+        if (toastCount++ < _maxToastCount()) {
+            var message = logs[logs.length - 1].message;
+            if (message.length > 100) {
+                message = message.substr(0,100) + '...';
+            }
+            chrome.extension.sendMessage({type: 'toast', toastType: type, message: message});
+        }
+    }
+
     /**
      * logs nicely formatted data in new format
      *
-     * @param Object
+     * @param data Object
+     * @param callback function
      * @return void
      */
     function _logData(data, callback)
@@ -61,12 +90,14 @@
         var column_name;
 
         for (var key in data.columns) {
-            column_name = data.columns[key];
-            column_map[column_name] = key;
+            if (data.columns.hasOwnProperty(key)) {
+                column_name = data.columns[key];
+                column_map[column_name] = key;
+            }
         }
 
         var rows = data.rows,
-            i = 0,
+            i,
             length = rows.length;
 
         for (i = 0; i < length; i++) {
@@ -79,6 +110,8 @@
             if (_showLineNumbers() && backtrace !== null) {
                 console.log('%c' + backtrace, 'color: ' + color1 + '; font-weight: bold;');
             }
+
+
 
             // new version without label
             var new_version = false;
@@ -107,6 +140,7 @@
                 current_log = log[j];
                 last_log = logs[logs.length - 1];
 
+
                 if (current_log && typeof current_log === 'object' && current_log['___class_name']) {
                     new_string = '%c' + current_log['___class_name'];
 
@@ -117,7 +151,6 @@
                         logs[logs.length - 1] = last_log + ' ' + new_string;
                     }
                     else {
-
                         // otherwise just push the new string to the end of the list
                         logs.push(new_string);
                     }
@@ -134,12 +167,18 @@
             }
 
             console[type].apply(console, logs);
+            if (type == 'warn' && _toastWarnings()) {
+                _toast('Warning', logs)
+            } else if (type == 'error' && _toastErrors()) {
+                _toast('Error', logs)
+            }
         }
 
         if (typeof callback === 'function') {
             callback();
         }
     }
+
 
     function _processQueue(callback)
     {
@@ -154,7 +193,7 @@
     /**
      * converts a string to json
      *
-     * @param string cookie
+     * @param json_string string
      * @return Object
      */
     function _jsonDecode(json_string)
@@ -218,7 +257,7 @@
     }
 
     function _initStorage() {
-        chrome.extension.sendMessage("localStorage", function(response) {
+        chrome.extension.sendMessage({type: "localStorage"}, function(response) {
             local_storage = response;
             color1 = 'color1' in local_storage ? local_storage['color1'] : color1;
             color2 = 'color2' in local_storage ? local_storage['color2'] : color2;
@@ -228,7 +267,7 @@
 
     function _init() {
         _listenForLogMessages();
-        chrome.extension.sendMessage("isActive", function(response) {
+        chrome.extension.sendMessage({type: "isActive"}, function(response) {
             if (response === false) {
                 return _stopListening();
             }
