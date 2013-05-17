@@ -139,7 +139,7 @@
                 last_log = logs[logs.length - 1];
 
 
-                if (typeof current_log === 'object' && current_log['___class_name']) {
+                if (current_log && typeof current_log === 'object' && current_log['___class_name']) {
                     new_string = '%c' + current_log['___class_name'];
 
                     if (typeof last_log === 'string') {
