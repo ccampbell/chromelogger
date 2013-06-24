@@ -26,6 +26,7 @@
         'warn': 1,
         'error': 1,
         'info': 1,
+        'table': 1,
         'log': 1
     };
 
