@@ -1,6 +1,6 @@
 {
     "name": "Chrome Logger",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "content_scripts": [
         {
             "matches": ["http://*/*", "https://*/*"],
