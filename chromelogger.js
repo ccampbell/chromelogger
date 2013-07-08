@@ -119,13 +119,18 @@
     }
 
     function _addListeners() {
+        var queuedRequests = [];
         chrome.browserAction.onClicked.addListener(_handleIconClick);
         chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
         chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
         chrome.webRequest.onResponseStarted.addListener(function (details) {
             if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
-                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details});
+                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details},function(response){
+                    if(!response){
+                        queuedRequests.push(details);
+                    }
+                });
             }
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
@@ -136,6 +141,11 @@
 
             if (request === "isActive") {
                 return sendResponse(active);
+            }
+            if (request === "ready") {
+                sendResponse(queuedRequests);
+                queuedRequests = [];
+                return;
             }
         });
     }
