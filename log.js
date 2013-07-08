@@ -235,6 +235,17 @@
             }
             return _initStorage();
         });
+        chrome.extension.sendMessage("ready", function(queuedRequests) {
+            if(queuedRequests){
+                for(var i=0;i<queuedRequests.length;i++){
+                    if(use_queue){
+                        queue.push(queuedRequests[i]);
+                    } else {
+                        _process(queuedRequests[i]);
+                    }
+                }
+            }
+        });
     }
 
     _init();
