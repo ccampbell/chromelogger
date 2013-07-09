@@ -124,7 +124,7 @@
         chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
         chrome.tabs.onUpdated.addListener(_handleTabUpdate);
 
-        chrome.webRequest.onResponseStarted.addListener(function (details) {
+        chrome.webRequest.onResponseStarted.addListener(function(details) {
             if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
                 chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details}, function(response) {
                     if (!response) {
