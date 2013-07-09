@@ -1,4 +1,4 @@
-// globals alert, chrome
+/* globals alert, chrome */
 (function () {
     'use strict';
 
