@@ -103,7 +103,9 @@
         });
     }
 
-    function _handleTabUpdate(tabId) {
+    function _handleTabUpdate(activeInfo) {
+        var tabId = activeInfo.tabId;
+
         chrome.tabs.get(tabId, function (tab) {
             if (_tabIsChrome(tab)) {
                 return _deactivate(tabId);
@@ -122,7 +124,7 @@
         var queuedRequests = [];
         chrome.browserAction.onClicked.addListener(_handleIconClick);
         chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
-        chrome.tabs.onUpdated.addListener(_handleTabUpdate);
+        chrome.tabs.onActivated.addListener(_handleTabUpdate);
 
         chrome.webRequest.onResponseStarted.addListener(function(details) {
             if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
