@@ -126,8 +126,8 @@
 
         chrome.webRequest.onResponseStarted.addListener(function (details) {
             if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
-                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details},function(response){
-                    if(!response){
+                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details}, function(response) {
+                    if (!response) {
                         queuedRequests.push(details);
                     }
                 });
@@ -142,6 +142,7 @@
             if (request === "isActive") {
                 return sendResponse(active);
             }
+
             if (request === "ready") {
                 sendResponse(queuedRequests);
                 queuedRequests = [];

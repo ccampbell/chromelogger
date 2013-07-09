@@ -229,18 +229,22 @@
 
     function _init() {
         _listenForLogMessages();
-        chrome.extension.sendMessage("isActive", function(response) {
+
+        chrome.extension.sendMessage('isActive', function(response) {
             if (response === false) {
                 return _stopListening();
             }
             return _initStorage();
         });
-        chrome.extension.sendMessage("ready", function(queuedRequests) {
-            if(queuedRequests){
-                for(var i=0;i<queuedRequests.length;i++){
-                    if(use_queue){
+
+        chrome.extension.sendMessage('ready', function(queuedRequests) {
+            if (queuedRequests) {
+                for (var i = 0; i < queuedRequests.length; i++) {
+                    if (use_queue) {
                         queue.push(queuedRequests[i]);
-                    } else {
+                        continue;
+                    }
+                    else {
                         _process(queuedRequests[i]);
                     }
                 }
