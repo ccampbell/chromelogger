@@ -21,6 +21,7 @@ This is a list of available server side libraries
 - .NET - https://github.com/ChrisMissal/chromelogger
 - ColdFusion - http://github.com/s992/chromelogger-cf
 - Go - http://github.com/pilu/traffic-chromelogger
+- Java - https://code.google.com/p/chromelogger4j/
 
 ## Development
 
