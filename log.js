@@ -152,41 +152,19 @@
         callback();
     }
 
-    /**
-     * converts a string to json
-     *
-     * @param string cookie
-     * @return Object
-     */
-    function _jsonDecode(json_string)
-    {
-        return JSON.parse(json_string);
-    }
-
     function _decode(header) {
-        return _jsonDecode(Base64.decode(header));
+        return JSON.parse(atob(header));
     }
 
     function _process(details) {
-        var headers = details.responseHeaders,
-            match = false,
-            header = '';
+        var headers = details.responseHeaders;
 
         for (var i = 0; i < headers.length; i++) {
             if (HEADER_NAMES.indexOf(headers[i].name.toLowerCase()) !== -1) {
-                header = headers[i].value;
-                match = true;
-                break;
+                _logData(_decode(headers[i].value));
+                return;
             }
         }
-
-        if (!match) {
-            return;
-        }
-
-        var data = _decode(header);
-
-        _logData(data);
     }
 
     function _handleHeaderUpdate(request, sender, sendResponse) {
