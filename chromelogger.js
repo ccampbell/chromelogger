@@ -8,11 +8,19 @@
     // list of all tabs with chrome logger enabled
     var tabsWithExtensionEnabled = [];
 
+    // A chrome tab in which the extension cannot run
+    var disabledUrls = [
+        'https://chrome.google.com/extensions',
+        'chrome://'
+    ];
+
     /**
      * determines if this tab is a chrome tab in which case the extension cannot run
      */
     function _tabIsChrome(tab) {
-        return tab.url.indexOf('https://chrome.google.com/extensions') === 0 || tab.url.indexOf('chrome://') === 0;
+        return disabledUrls.some(function (url) {
+            return tab.url.indexOf(url) === 0;
+        });
     }
 
     /**
@@ -20,34 +28,45 @@
      */
     function _handleIconClick(tab) {
         if (_tabIsChrome(tab)) {
-            return alert('You cannot use Chrome Logger on this page.');
+            alert('You cannot use Chrome Logger on this page.');
+            return;
         }
         _toggleDomain(tab);
     }
 
     function _toggleDomain(tab) {
-        var url = tab.url;
-        url = _getTopLevelDomain(url);
-        if (_domainIsActive(url)) {
-            localStorage[url] = false;
+        var host = _getHost(tab.url);
+
+        if (_domainIsActive(host)) {
+            delete localStorage['host::' + host];
             _deactivate(tab.id);
             return;
         }
-        localStorage[url] = true;
+        localStorage['host::' + host] = 'true';
         _activate(tab.id);
     }
 
-    function _getTopLevelDomain(url) {
-        url = url.replace(/^(https?:\/\/)/, '', url);
-        var host = url.split('/')[0];
-        var bits = host.split('.');
-        var tld = bits.pop();
-        host = bits.pop();
-        return host + '.' + tld;
+    // ported from http://stackoverflow.com/questions/4826061/what-is-the-fastest-way-to-get-the-domain-host-name-from-a-url
+    function _getHost(url) {
+        if (!url) {
+            return "";
+        }
+
+        var doubleslash = url.indexOf("//");
+        doubleslash += (doubleslash == -1) ? 1 : 2;
+
+        var end = url.indexOf('/', doubleslash);
+        end = end >= 0 ? end : url.length;
+
+        // Use this if we don't want port. But we do want port.
+        // var port = url.indexOf(':', doubleslash);
+        // end = (port > 0 && port < end) ? port : end;
+
+        return url.substring(doubleslash, end);
     }
 
-    function _domainIsActive(url) {
-        return localStorage[url] === "true";
+    function _domainIsActive(host) {
+        return localStorage['host::' + host] === 'true';
     }
 
     function _activate(tabId) {
@@ -103,37 +122,55 @@
         });
     }
 
-    function _handleTabUpdate(activeInfo) {
-        var tabId = activeInfo.tabId;
+    function _handleTabActivated(activeInfo) {
+        // This is sometimes undefined but an integer is required for chrome.tabs.get
+        if (typeof activeInfo.tabId != 'number') {
+            return;
+        }
 
-        chrome.tabs.get(tabId, function (tab) {
-            if (_tabIsChrome(tab)) {
-                return _deactivate(tabId);
-            }
+        chrome.tabs.get(activeInfo.tabId, _handleTabEvent);
+    }
 
-            var domain = _getTopLevelDomain(tab.url);
-            if (_domainIsActive(domain)) {
-                return _activate(tabId);
-            }
+    function _handleTabUpdated(tabId, changeInfo, tab) {
+        _handleTabEvent(tab);
+    }
 
-            _deactivate(tabId);
-        });
+    function _handleTabEvent(tab) {
+        var id = (typeof tab.id === 'number') ? tab.id : tab.sessionID;
+
+        if (!tab.active) {
+            return;
+        }
+
+        if (typeof id === 'undefined') {
+            return;
+        }
+
+        if (_tabIsChrome(tab)) {
+            _deactivate(id);
+            return;
+        }
+
+        return _domainIsActive(_getHost(tab.url)) ? _activate(id) : _deactivate(id);
     }
 
     function _addListeners() {
         var queuedRequests = [];
         chrome.browserAction.onClicked.addListener(_handleIconClick);
-        chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
-        chrome.tabs.onActivated.addListener(_handleTabUpdate);
+        chrome.tabs.onCreated.addListener(_handleTabEvent);
+        chrome.tabs.onActivated.addListener(_handleTabActivated);
+        chrome.tabs.onUpdated.addListener(_handleTabUpdated);
 
         chrome.webRequest.onResponseStarted.addListener(function(details) {
-            if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
-                chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details}, function(response) {
-                    if (!response) {
-                        queuedRequests.push(details);
-                    }
-                });
+            if (details.tabId < 0 || !_domainIsActive(_getHost(details.url))) {
+                return;
             }
+
+            chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details}, function(response) {
+                if (!response) {
+                    queuedRequests.push(details);
+                }
+            });
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
         chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
