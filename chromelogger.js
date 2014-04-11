@@ -9,10 +9,26 @@
     var tabsWithExtensionEnabled = [];
 
     /**
-     * determines if this tab is a chrome tab in which case the extension cannot run
+     * List of partial urls on which the extension cannot run.
+     *
+     * @type  Array
+     */
+    var disabledUrls = [
+        'https://chrome.google.com/extensions',
+        'chrome://'
+    ];
+
+    /**
+     * Determines if this tab is a chrome tab in which case the extension cannot run.
+     *
+     * @param   object  tab
+     *
+     * @return  boolean
      */
     function _tabIsChrome(tab) {
-        return tab.url.indexOf('https://chrome.google.com/extensions') === 0 || tab.url.indexOf('chrome://') === 0;
+        return disabledUrls.some(function (url) {
+            return tab.url.indexOf(url) === 0;
+        });
     }
 
     /**
