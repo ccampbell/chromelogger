@@ -1,4 +1,4 @@
-/* globals chrome, console, Base64 */
+/* globals chrome, console */
 /**
  * code for handling all the logging magic
  *
