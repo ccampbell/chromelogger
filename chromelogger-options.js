@@ -34,9 +34,15 @@
     }
 
     function _setInputValue(input, value) {
+        if (input.type === 'checkbox') {
+            input.checked = value && value !== 'false';
+            return;
+        }
+
         if (input.type === 'color' && !/#\d{6}/.test(value)) {
             value = defaults[input.name];
         }
+
         input.value = value;
     }
 
@@ -47,12 +53,7 @@
             var value = defaults[input.name];
 
             localStorage[input.name] = value;
-
-            if (input.type == 'checkbox') {
-                input.checked = value;
-            } else {
-                _setInputValue(input, value);
-            }
+            _setInputValue(input, value);
         });
 
         showMessage('settings have been restored to the defaults');
@@ -60,11 +61,7 @@
 
     function init() {
         getInputs().forEach(function(input) {
-            if (input.type == 'checkbox') {
-                input.checked = input.name in localStorage ? localStorage[input.name] === "true" : defaults[input.name];
-            } else {
-                _setInputValue(input, input.name in localStorage ? localStorage[input.name] : defaults[input.name]);
-            }
+            _setInputValue(input, input.name in localStorage ? localStorage[input.name] : defaults[input.name]);
         });
 
         document.getElementById('save').addEventListener('click', saveOptions, false);
