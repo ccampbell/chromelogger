@@ -16,38 +16,78 @@
     }
 
     /**
-     * handles a click on the extension icon
+     * Handles a click on the extension icon.
+     *
+     * @param   object  tab (https://developer.chrome.com/extensions/tabs#type-Tab)
+     *
+     * @return  void
      */
     function _handleIconClick(tab) {
         if (_tabIsChrome(tab)) {
-            return alert('You cannot use Chrome Logger on this page.');
+            alert('You cannot use Chrome Logger on this page.');
+            return;
         }
-        _toggleDomain(tab);
+        _toggleActivity(tab);
     }
 
-    function _toggleDomain(tab) {
-        var url = tab.url;
-        url = _getTopLevelDomain(url);
-        if (_domainIsActive(url)) {
-            localStorage[url] = false;
+    /**
+     * Switch the current tab from active to inactive or vice-versa.
+     *
+     * @param   object  tab (https://developer.chrome.com/extensions/tabs#type-Tab)
+     *
+     * @return  void
+     */
+    function _toggleActivity(tab) {
+        var host = _getHost(tab.url);
+
+        if (_hostIsActive(host)) {
+            delete localStorage['host::' + host];
             _deactivate(tab.id);
             return;
         }
-        localStorage[url] = true;
+        localStorage['host::' + host] = 'true';
         _activate(tab.id);
     }
 
-    function _getTopLevelDomain(url) {
-        url = url.replace(/^(https?:\/\/)/, '', url);
-        var host = url.split('/')[0];
-        var bits = host.split('.');
-        var tld = bits.pop();
-        host = bits.pop();
-        return host + '.' + tld;
+    /**
+     * Get the host (domain+port) from a url.
+     * ported from http://stackoverflow.com/questions/4826061/what-is-the-fastest-way-to-get-the-domain-host-name-from-a-url
+     *
+     * @param   string  url
+     *
+     * @return  string
+     */
+    function _getHost(url) {
+        if (!url) {
+            return "";
+        }
+
+        var doubleslash = url.indexOf("//");
+        doubleslash += (doubleslash == -1) ? 1 : 2;
+
+        var end = url.indexOf('/', doubleslash);
+        end = end >= 0 ? end : url.length;
+
+        // Use this if we don't want port. But we do want port.
+        // var port = url.indexOf(':', doubleslash);
+        // end = (port > 0 && port < end) ? port : end;
+
+        return url.substring(doubleslash, end);
     }
 
-    function _domainIsActive(url) {
-        return localStorage[url] === "true";
+    /**
+     * Test to determine if a given host is active
+     *
+     * @param   string  host
+     *
+     * @return  boolean
+     */
+    function _hostIsActive(host) {
+        if (typeof localStorage['host::' + host] === 'undefined') {
+            return false;
+        } else {
+            return localStorage.hosts['host::' + host] === 'true';
+        }
     }
 
     function _activate(tabId) {
@@ -111,8 +151,8 @@
                 return _deactivate(tabId);
             }
 
-            var domain = _getTopLevelDomain(tab.url);
-            if (_domainIsActive(domain)) {
+            var domain = _getHost(tab.url);
+            if (_hostIsActive(domain)) {
                 return _activate(tabId);
             }
 
