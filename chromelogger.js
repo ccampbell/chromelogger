@@ -56,7 +56,6 @@
         if (tabsWithExtensionEnabled.indexOf(tabId) === -1) {
             tabsWithExtensionEnabled.push(tabId);
         }
-
         _enableIcon();
         _activateTitle(tabId);
     }
@@ -120,6 +119,22 @@
         });
     }
 
+    function _modHeaders(header_array, p_name, p_value) {
+     var did_set = false;
+     for(var i in header_array) {
+         var header = header_array[i];
+         var name = header.name;
+         var value = header.value;
+
+         // If the header is already present, change it:
+         if(name == p_name) {
+             header.value = p_value;
+             did_set = true;
+         }
+     }
+     // if it is not, add it:
+     if(!did_set) { header_array.push( { name : p_name , value : p_value } ); }
+    }
     function _addListeners() {
         var queuedRequests = [];
         chrome.browserAction.onClicked.addListener(_handleIconClick);
@@ -151,6 +166,12 @@
                 return;
             }
         });
+        chrome.webRequest.onBeforeSendHeaders.addListener(function(details){
+          if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
+            _modHeaders(details.requestHeaders, 'x-chromelogger-enabled', 'true');
+          }
+          return {requestHeaders: details.requestHeaders};
+        },{urls:  ["<all_urls>"]}, ["requestHeaders", "blocking"]);
     }
 
     _addListeners();
