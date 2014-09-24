@@ -38,10 +38,10 @@
         if (_tabIsChrome(tab)) {
             return alert('You cannot use Chrome Logger on this page.');
         }
-        _toggleDomain(tab);
+        _toggleActivity(tab);
     }
 
-    function _toggleDomain(tab) {
+    function _toggleActivity(tab) {
         var url = tab.url;
         var host = _getHost(url);
         if (_hostIsActive(host)) {
