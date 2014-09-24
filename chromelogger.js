@@ -43,26 +43,23 @@
 
     function _toggleDomain(tab) {
         var url = tab.url;
-        url = _getTopLevelDomain(url);
-        if (_domainIsActive(url)) {
-            localStorage[url] = false;
+        var host = _getHost(url);
+        if (_hostIsActive(host)) {
+            delete localStorage[host];
             _deactivate(tab.id);
             return;
         }
-        localStorage[url] = true;
+        localStorage[host] = true;
         _activate(tab.id);
     }
 
-    function _getTopLevelDomain(url) {
+    function _getHost(url) {
         url = url.replace(/^(https?:\/\/)/, '', url);
         var host = url.split('/')[0];
-        var bits = host.split('.');
-        var tld = bits.pop();
-        host = bits.pop();
-        return host + '.' + tld;
+        return host;
     }
 
-    function _domainIsActive(url) {
+    function _hostIsActive(url) {
         return localStorage[url] === "true";
     }
 
@@ -173,7 +170,12 @@
             return;
         }
 
-        _domainIsActive(_getTopLevelDomain(tab.url)) ? _activate(id) : _deactivate(id);
+        if (_hostIsActive(_getHost(tab.url))) {
+            _activate(id);
+            return;
+        }
+
+        _deactivate(id);
     }
 
     function _addListeners() {
