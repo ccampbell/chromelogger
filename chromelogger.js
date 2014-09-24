@@ -103,28 +103,69 @@
         });
     }
 
-    function _handleTabUpdate(activeInfo) {
-        var tabId = activeInfo.tabId;
+    /**
+     * A tab has become active.
+     * https://developer.chrome.com/extensions/tabs#event-onActivated
+     *
+     * @param   {[type]}  activeInfo
+     *
+     * @return  void
+     */
+    function _handleTabActivated(activeInfo) {
+        // This is sometimes undefined but an integer is required for chrome.tabs.get
+        if (typeof activeInfo.tabId != 'number') {
+            return;
+        }
 
-        chrome.tabs.get(tabId, function (tab) {
-            if (_tabIsChrome(tab)) {
-                return _deactivate(tabId);
-            }
+        chrome.tabs.get(activeInfo.tabId, _handleTabEvent);
+    }
 
-            var domain = _getTopLevelDomain(tab.url);
-            if (_domainIsActive(domain)) {
-                return _activate(tabId);
-            }
+    /**
+     * A tab was updated.
+     * https://developer.chrome.com/extensions/tabs#event-onUpdated
+     *
+     * @param   integer  tabId
+     * @param   object   changeInfo
+     * @param   object   tab
+     *
+     * @return  void
+     */
+    function _handleTabUpdated(tabId, changeInfo, tab) {
+        _handleTabEvent(tab);
+    }
 
-            _deactivate(tabId);
-        });
+    /**
+     * Handle an event for any tab. Activate or deactivate the extension for the current tab.
+     *
+     * @param   object  tab
+     *
+     * @return  void
+     */
+    function _handleTabEvent(tab) {
+        var id = (typeof tab.id === 'number') ? tab.id : tab.sessionID;
+
+        if (!tab.active) {
+            return;
+        }
+
+        if (typeof id === 'undefined') {
+            return;
+        }
+
+        if (_tabIsChrome(tab)) {
+            _deactivate(id);
+            return;
+        }
+
+        _domainIsActive(_getTopLevelDomain(tab.url)) ? _activate(id) : _deactivate(id);
     }
 
     function _addListeners() {
         var queuedRequests = [];
         chrome.browserAction.onClicked.addListener(_handleIconClick);
-        chrome.tabs.onSelectionChanged.addListener(_handleTabUpdate);
-        chrome.tabs.onActivated.addListener(_handleTabUpdate);
+        chrome.tabs.onActivated.addListener(_handleTabActivated);
+        chrome.tabs.onCreated.addListener(_handleTabEvent);
+        chrome.tabs.onUpdated.addListener(_handleTabUpdated);
 
         chrome.webRequest.onResponseStarted.addListener(function(details) {
             if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
