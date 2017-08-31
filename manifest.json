@@ -11,7 +11,9 @@
     "background": {
         "scripts": ["chromelogger.js"]
     },
-    "options_page": "options.html",
+    "options_ui": {
+        "page": "options.html"
+    },
     "icons": {
         "16": "icon16.png",
         "48": "icon48.png",

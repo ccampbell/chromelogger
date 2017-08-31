@@ -195,7 +195,7 @@
             }
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
-        chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
+        chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
             if (request === "localStorage") {
                 return sendResponse(localStorage);
             }

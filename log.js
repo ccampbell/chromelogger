@@ -183,11 +183,11 @@
     }
 
     function _listenForLogMessages() {
-        chrome.extension.onMessage.addListener(_handleHeaderUpdate);
+        chrome.runtime.onMessage.addListener(_handleHeaderUpdate);
     }
 
     function _stopListening() {
-        chrome.extension.onMessage.removeListener(_handleHeaderUpdate);
+        chrome.runtime.onMessage.removeListener(_handleHeaderUpdate);
     }
 
     function _run() {
@@ -197,7 +197,7 @@
     }
 
     function _initStorage() {
-        chrome.extension.sendMessage("localStorage", function(response) {
+        chrome.runtime.sendMessage("localStorage", function(response) {
             local_storage = response;
             color1 = 'color1' in local_storage ? local_storage['color1'] : color1;
             color2 = 'color2' in local_storage ? local_storage['color2'] : color2;
@@ -208,14 +208,14 @@
     function _init() {
         _listenForLogMessages();
 
-        chrome.extension.sendMessage('isActive', function(response) {
+        chrome.runtime.sendMessage('isActive', function(response) {
             if (response === false) {
                 return _stopListening();
             }
             return _initStorage();
         });
 
-        chrome.extension.sendMessage('ready', function(queuedRequests) {
+        chrome.runtime.sendMessage('ready', function(queuedRequests) {
             if (queuedRequests) {
                 for (var i = 0; i < queuedRequests.length; i++) {
                     if (use_queue) {
