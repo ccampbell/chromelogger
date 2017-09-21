@@ -5,6 +5,7 @@
         body {
             font-family: helvetica, sans-serif;
             width: 800px;
+            font-size: 1em;
             margin: auto;
         }
 
@@ -33,10 +34,23 @@
         }
 
         header {
-            width: 488px;
+            display: flex;
+            width: 500px;
             margin: auto;
             margin-top: 20px;
+            justify-content: center;
             overflow: hidden;
+        }
+
+        .wrapper {
+            width: 800px;
+            display: flex;
+        }
+
+        .donate h2 {
+            font-size: 18px;
+            text-decoration: underline;
+            margin: 30px 0 20px 0;
         }
 
         header h1 {
@@ -49,7 +63,7 @@
         }
 
         .content {
-            width: 400px;
+            width: 500px;
             margin: auto;
             margin-top: 30px;
             background: #eee;
@@ -82,6 +96,23 @@
         p.info {
             font-size: .8em;
         }
+
+        p.donate {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        p.donate a {
+            color: #0563ad;
+        }
+
+        p.donate a:hover {
+            color: #001220;
+        }
+
+        p.donate a:active {
+            color: #00080E;
+        }
     </style>
 
     <script src="chromelogger-options.js"></script>
@@ -91,39 +122,45 @@
         <img src="icon48.png" alt="logo">
         <h1>Chrome Logger Options</h1>
     </header>
-    <div class="content">
-        <form>
-            <label>
-                show line numbers:
-                <input type="checkbox" name="show_line_numbers">
-            </label>
-            <p class="info">show the filenames and line numbers where your calls originated</p>
+    <div class="wrapper">
+        <div class="content">
+            <form>
+                <label>
+                    show line numbers:
+                    <input type="checkbox" name="show_line_numbers">
+                </label>
+                <p class="info">show the filenames and line numbers where your calls originated</p>
 
-            <label>
-                show upgrade messages:
-                <input type="checkbox" name="show_upgrade_messages">
-            </label>
-            <p class="info">show upgrade messages when your server side library is out of date</p>
+                <label>
+                    show upgrade messages:
+                    <input type="checkbox" name="show_upgrade_messages">
+                </label>
+                <p class="info">show upgrade messages when your server side library is out of date</p>
 
-            <label>
-                color 1:
-                <input type="color" name="color1" value="">
-            </label>
-            <p class="info">color used for line numbers</p>
+                <label>
+                    color 1:
+                    <input type="color" name="color1" value="">
+                </label>
+                <p class="info">color used for line numbers</p>
 
-            <label>
-                color 2:
-                <input type="color" name="color2" value="">
-            </label>
-            <p class="info">color used for class names</p>
+                <label>
+                    color 2:
+                    <input type="color" name="color2" value="">
+                </label>
+                <p class="info">color used for class names</p>
 
-            <div class="buttons">
-                <button id="save">Save Changes</button>
-                <button id="restore">Restore Defaults</button>
-            </div>
+                <div class="buttons">
+                    <button id="save">Save Changes</button>
+                    <button id="restore">Restore Defaults</button>
+                </div>
 
-            <div id="info"></div>
-        </form>
+                <div id="info"></div>
+            </form>
+        </div>
+        <div class="donate">
+            <h2>Donate</h2>
+            <iframe src="https://donatefor.me/craig?text=0" width="200" height="220" frameborder="0"></iframe>
+        </div>
     </div>
 </body>
 </html>
