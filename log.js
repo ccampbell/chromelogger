@@ -13,6 +13,12 @@
     var HEADER_NAMES = ['x-chromelogger-data', 'x-chromephp-data'];
 
     /**
+     * @var string
+     */
+    var HEADER_NAME_FILE = 'x-chromelogger-data-file';
+
+
+    /**
      * @var object
      */
     var local_storage = null;
@@ -164,7 +170,22 @@
                 _logData(_decode(headers[i].value));
                 return;
             }
+            else if (headers[i].name.toLowerCase() == HEADER_NAME_FILE) {
+                _getDataFromFile(headers[i].value);
+                return;
+            }
         }
+    }
+
+    function _getDataFromFile(fileUrl) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", fileUrl);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+                _logData(JSON.parse(xhr.responseText));
+            }
+        }
+        xhr.send();
     }
 
     function _handleHeaderUpdate(request, sender, sendResponse) {
