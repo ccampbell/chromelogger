@@ -86,6 +86,10 @@
         _deactivateTitle(tabId);
     }
 
+    function _tabIsActive(tabId) {
+        return tabsWithExtensionEnabled.indexOf(tabId) !== -1;
+    }
+
     function _activateTitle(tabId) {
         chrome.browserAction.getTitle({tabId: tabId}, function(title) {
             chrome.browserAction.setTitle({
@@ -185,8 +189,17 @@
         chrome.tabs.onCreated.addListener(_handleTabEvent);
         chrome.tabs.onUpdated.addListener(_handleTabUpdated);
 
+        chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
+            if (_tabIsActive(details.tabId)) {
+                // Add a header that enables the server-side to detect when ChromeLogger is enabled:
+                details.requestHeaders.push({ name: "X-Chromelogger", value: "1" });
+            }
+
+            return {requestHeaders: details.requestHeaders};
+        }, {urls: ["<all_urls>"]}, ["blocking", "requestHeaders"]);
+
         chrome.webRequest.onResponseStarted.addListener(function(details) {
-            if (tabsWithExtensionEnabled.indexOf(details.tabId) !== -1) {
+            if (_tabIsActive(details.tabId)) {
                 chrome.tabs.sendMessage(details.tabId, {name: "header_update", details: details}, function(response) {
                     // Previously this would only queue up the header updates
                     // if the content script did not send back a response. This
