@@ -15,7 +15,7 @@
     /**
      * @var object
      */
-    var local_storage = null;
+    var settings = null;
     var color1 = '#888';
     var color2 = '#0563ad';
 
@@ -47,7 +47,7 @@
      */
     function _showLineNumbers()
     {
-        return local_storage.show_line_numbers === "true";
+        return settings.show_line_numbers === true;
     }
 
     /**
@@ -197,10 +197,10 @@
     }
 
     function _initStorage() {
-        chrome.runtime.sendMessage("localStorage", function(response) {
-            local_storage = response;
-            color1 = 'color1' in local_storage ? local_storage['color1'] : color1;
-            color2 = 'color2' in local_storage ? local_storage['color2'] : color2;
+        chrome.runtime.sendMessage('settings', function(response, two, three) {
+            settings = response;
+            color1 = 'color1' in settings ? settings.color1 : color1;
+            color2 = 'color2' in settings ? settings.color2 : color2;
             _run();
         });
     }
