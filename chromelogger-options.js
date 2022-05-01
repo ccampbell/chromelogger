@@ -39,7 +39,7 @@
             return;
         }
 
-        if (input.type === 'color' && !/#\d{6}/.test(value)) {
+        if (input.type === 'color' && !/#[0-9a-f]{6}/.test(value)) {
             value = defaults[input.name];
         }
 
