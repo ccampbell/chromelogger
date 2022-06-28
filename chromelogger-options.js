@@ -1,6 +1,6 @@
-// global localStorage
 (function() {
     'use strict';
+    var settings;
 
     var defaults = {
         show_upgrade_messages: true,
@@ -27,8 +27,12 @@
         e.preventDefault();
 
         getInputs().forEach(function(input) {
-            localStorage[input.name] = input.type == 'checkbox' ? input.checked : input.value;
+            settings[input.name] = input.type == 'checkbox' ? input.checked : input.value;
         });
+
+        let newSettings = Object.assign({}, settings);
+        newSettings.event = 'saveSettings';
+        chrome.runtime.sendMessage(newSettings);
 
         showMessage('your settings have been saved');
     }
@@ -39,7 +43,7 @@
             return;
         }
 
-        if (input.type === 'color' && !/#\d{6}/.test(value)) {
+        if (input.type === 'color' && !/#[0-9a-f]{6}/.test(value)) {
             value = defaults[input.name];
         }
 
@@ -52,16 +56,23 @@
         getInputs().forEach(function(input) {
             var value = defaults[input.name];
 
-            localStorage[input.name] = value;
+            settings[input.name] = value;
             _setInputValue(input, value);
         });
+
+        let newSettings = Object.assign({}, settings);
+        newSettings.event = 'saveSettings';
+        chrome.runtime.sendMessage(newSettings);
 
         showMessage('settings have been restored to the defaults');
     }
 
     function init() {
-        getInputs().forEach(function(input) {
-            _setInputValue(input, input.name in localStorage ? localStorage[input.name] : defaults[input.name]);
+        chrome.runtime.sendMessage('settings', function(response, two, three) {
+            settings = response;
+            getInputs().forEach(function(input) {
+                _setInputValue(input, input.name in settings ? settings[input.name] : defaults[input.name]);
+            });
         });
 
         document.getElementById('save').addEventListener('click', saveOptions, false);

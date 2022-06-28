@@ -36,20 +36,23 @@
      */
     function _handleIconClick(tab) {
         if (_tabIsChrome(tab)) {
-            return alert('You cannot use Chrome Logger on this page.');
+            return;
         }
         _toggleActivity(tab);
     }
 
-    function _toggleActivity(tab) {
+    async function _toggleActivity(tab) {
         var url = tab.url;
         var host = _getHost(url);
-        if (_hostIsActive(host)) {
-            delete localStorage[host];
+        if (await _hostIsActive(host)) {
+            chrome.storage.sync.remove(host);
             _deactivate(tab.id);
             return;
         }
-        localStorage[host] = true;
+
+        var data = {};
+        data[host] = true;
+        chrome.storage.sync.set(data);
         _activate(tab.id);
     }
 
@@ -59,8 +62,9 @@
         return host;
     }
 
-    function _hostIsActive(url) {
-        return localStorage[url] === "true";
+    async function _hostIsActive(url) {
+        const result = await chrome.storage.sync.get(url);
+        return result[url] === true;
     }
 
     function _activate(tabId) {
@@ -87,8 +91,8 @@
     }
 
     function _activateTitle(tabId) {
-        chrome.browserAction.getTitle({tabId: tabId}, function(title) {
-            chrome.browserAction.setTitle({
+        chrome.action.getTitle({tabId: tabId}, function(title) {
+            chrome.action.setTitle({
                 title: title.replace(inactiveSuffix, ''),
                 tabId: tabId
             });
@@ -96,8 +100,8 @@
     }
 
     function _deactivateTitle(tabId) {
-        chrome.browserAction.getTitle({tabId: tabId}, function(title) {
-            chrome.browserAction.setTitle({
+        chrome.action.getTitle({tabId: tabId}, function(title) {
+            chrome.action.setTitle({
                 title: title.indexOf(inactiveSuffix) === -1 ? title + inactiveSuffix : title,
                 tabId: tabId
             });
@@ -105,13 +109,13 @@
     }
 
     function _enableIcon() {
-        chrome.browserAction.setIcon({
+        chrome.action.setIcon({
             path: "icon38.png"
         });
     }
 
     function _disableIcon() {
-        chrome.browserAction.setIcon({
+        chrome.action.setIcon({
             path: "icon38_disabled.png"
         });
     }
@@ -154,7 +158,7 @@
      *
      * @return  void
      */
-    function _handleTabEvent(tab) {
+    async function _handleTabEvent(tab) {
         var id = (typeof tab.id === 'number') ? tab.id : tab.sessionID;
 
         if (!tab.active) {
@@ -170,7 +174,7 @@
             return;
         }
 
-        if (_hostIsActive(_getHost(tab.url))) {
+        if (await _hostIsActive(_getHost(tab.url))) {
             _activate(id);
             return;
         }
@@ -180,7 +184,7 @@
 
     function _addListeners() {
         var queuedRequests = {};
-        chrome.browserAction.onClicked.addListener(_handleIconClick);
+        chrome.action.onClicked.addListener(_handleIconClick);
         chrome.tabs.onActivated.addListener(_handleTabActivated);
         chrome.tabs.onCreated.addListener(_handleTabEvent);
         chrome.tabs.onUpdated.addListener(_handleTabUpdated);
@@ -218,8 +222,18 @@
         }, {urls: ["<all_urls>"]}, ["responseHeaders"]);
 
         chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-            if (request === "localStorage") {
-                return sendResponse(localStorage);
+            if (typeof request === 'object' && request.event === 'saveSettings') {
+                delete request.event;
+                chrome.storage.sync.set({settings: request});
+                sendResponse('saved');
+                return;
+            }
+
+            if (request === 'settings') {
+                chrome.storage.sync.get('settings', (settings) => {
+                    sendResponse(settings.settings || {});
+                });
+                return true;
             }
 
             if (request === "isActive") {
